@@ -8,6 +8,21 @@ app = FastAPI(
     version="1.0.0"
 )
 
+@app.get("/")
+async def root():
+    return {
+        "status": "working",
+        "message": "MadhuAI Backend is Live 🚀"
+    }
+
+
+@app.get("/health")
+async def health():
+    return {
+        "status": "healthy",
+        "server": "running"
+    }
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000",
