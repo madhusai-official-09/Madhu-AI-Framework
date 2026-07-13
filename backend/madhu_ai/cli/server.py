@@ -3,20 +3,16 @@ import uvicorn
 import os
 
 def serve():
-    print("=" * 50)
-    print("SERVER STARTED")
-    print("=" * 50)
+    print("=== SERVER STARTING ===")
 
     app = FastAPI()
 
     @app.get("/")
-    def home():
-        return {"status": "MadhuAI Backend Running"}
+    def root():
+        return {"status": "ok"}
 
-    port = int(os.getenv("PORT", 8000))
-
-    print(f"PORT = {port}")
-    print("Starting Uvicorn...")
+    port = int(os.getenv("PORT", "8000"))
+    print(f"Using port: {port}")
 
     uvicorn.run(
         app,
