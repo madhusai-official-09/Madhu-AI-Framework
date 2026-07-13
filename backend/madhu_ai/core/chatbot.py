@@ -13,8 +13,7 @@ from ..loaders.website_loader import WebsiteLoader
 from ..rag.chunker import TextChunker
 from ..prompts.builder import PromptBuilder
 
-from ..embeddings.sentence_transformer import EmbeddingModel
-from ..vectorstores.chroma_store import ChromaStore
+
 from ..rag.retriever import Retriever
 
 from ..ingestion.ingestor import Ingestor
@@ -63,6 +62,8 @@ class MadhuAI:
         if self.embedding_model is None:
 
             self.logger.info("Loading embedding model...")
+            
+            from ..embeddings.sentence_transformer import EmbeddingModel
 
             self.embedding_model = EmbeddingModel
 
@@ -71,7 +72,11 @@ class MadhuAI:
     def get_vector_db(self):
 
         if self.vector_db is None:
-
+            
+            self.logger.info("Loading ChromaDB")
+            
+            from ..vectorstores.chroma_store import ChromaStore
+            
             self.vector_db = ChromaStore
 
         return self.vector_db
