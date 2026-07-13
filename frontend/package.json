@@ -1,44 +1,28 @@
 {
-  "name": "madhu-ai-react",
+  "name": "madhu-ai-frontend",
+  "private": true,
   "version": "1.0.0",
-  "description": "Official React SDK for MadhuAI",
-  "license": "MIT",
   "type": "module",
-  "main": "./dist/madhu-ai-react.umd.cjs",
-  "module": "./dist/madhu-ai-react.js",
-  "types": "./dist/index.d.ts",
-  "files": [
-    "dist"
-  ],
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/madhu-ai-react.js",
-      "require": "./dist/madhu-ai-react.umd.cjs"
-    }
-  },
+
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "vite build",
     "preview": "vite preview"
   },
-  "peerDependencies": {
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0"
-  },
+
   "dependencies": {
     "framer-motion": "^12.42.2",
     "lucide-react": "^1.24.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
     "react-markdown": "^10.1.0",
     "react-syntax-highlighter": "^16.1.1",
     "remark-gfm": "^4.0.1"
   },
+
   "devDependencies": {
-    "@tailwindcss/vite": "^4.3.2",
-    "@types/node": "^26.1.1",
     "@vitejs/plugin-react": "^6.0.3",
-    "typescript": "~6.0.2",
-    "vite": "^8.1.1",
-    "vite-plugin-dts": "^5.0.3"
+    "typescript": "^5",
+    "vite": "^8"
   }
 }
