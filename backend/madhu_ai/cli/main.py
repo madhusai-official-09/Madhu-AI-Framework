@@ -54,6 +54,7 @@ def main():
         create_project(args.project_name)
 
     elif args.command == "serve":
+        print("CLI reached serve command")
         serve()
 
     elif args.command == "plugin":

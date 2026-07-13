@@ -5,6 +5,7 @@ import os
 def serve():
     print("=== SERVER STARTING ===")
 
+    print("Creating FastAPI...")
     app = FastAPI()
 
     @app.get("/")
