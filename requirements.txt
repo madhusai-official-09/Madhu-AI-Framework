@@ -1,12 +1,13 @@
 fastapi
-uvicorn
+uvicorn[standard]
 python-dotenv
 httpx
 openai
 groq
-pypdf
-sentence-transformers
 chromadb
-python-multipart
+sentence-transformers
+pypdf
 beautifulsoup4
 requests
+python-multipart
+numpy

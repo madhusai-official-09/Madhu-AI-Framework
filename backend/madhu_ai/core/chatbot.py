@@ -26,6 +26,7 @@ from ..agents.assistant import AssistantAgent
 from ..agents.rag_agent import RAGAgent
 
 
+
 class MadhuAI:
 
     def __init__(self, config: Config | None = None):
@@ -36,24 +37,23 @@ class MadhuAI:
 
         self.memory = ConversationMemory()
 
-        self.loader = TextLoader()
-        self.pdf_loader = PDFLoader()
-        self.website_loader = WebsiteLoader()
+        self.loader = None
+        self.pdf_loader = None
+        self.website_loader = None
 
-        self.chunker = TextChunker()
+        self.chunker = None
 
-        # Lazy-loaded components
         self.embedding_model = None
         self.vector_db = None
         self.retriever = None
         self.provider = None
 
-        self.ingestor = Ingestor(self)
+        self.ingestor = None
 
-        self.plugins = PluginManager()
+        self.plugins = None
 
-        self.assistant = AssistantAgent(self)
-        self.rag = RAGAgent(self)
+        self.assistant = None
+        self.rag = None
 
         self.logger.info("MadhuAI initialized.")
 
@@ -62,9 +62,7 @@ class MadhuAI:
 
         if self.embedding_model is None:
 
-            self.logger.info(
-                "Loading embedding model..."
-            )
+            self.logger.info("Loading embedding model...")
 
             self.embedding_model = EmbeddingModel()
 
@@ -73,10 +71,6 @@ class MadhuAI:
     def get_vector_db(self):
 
         if self.vector_db is None:
-
-            self.logger.info(
-                "Opening vector database..."
-            )
 
             self.vector_db = ChromaStore()
 
@@ -171,21 +165,24 @@ class MadhuAI:
     def mount(self, app):
         app.include_router(create_router(self))
 
-    def add_text(self, path: str):
+    def add_text(self, path):
 
+        if self.loader is None:
+
+            self.loader = TextLoader()
         self.get_retriever()
-
-        self.logger.info(f"Adding text: {path}")
-
+        
         text = self.loader.load(path)
 
         return self._index_document(text)
 
     def add_pdf(self, path: str):
 
-        self.get_retriever()
+        if self.pdf_loader is None:
 
-        self.logger.info(f"Adding PDF: {path}")
+            self.pdf_loader = PDFLoader()
+
+        self.get_retriever()
 
         text = self.pdf_loader.load(path)
 
@@ -193,9 +190,11 @@ class MadhuAI:
 
     def add_website(self, url: str):
 
-        self.get_retriever()
+        if self.website_loader is None:
 
-        self.logger.info(f"Crawling website: {url}")
+            self.website_loader = WebsiteLoader()
+
+        self.get_retriever()
 
         text = self.website_loader.load(url)
 
@@ -224,13 +223,16 @@ class MadhuAI:
 
         return len(chunks)
 
-    def ingest(self, path: str):
-        self.get_retriever()
+    def ingest(self, path):
+        
+        if self.Ingestor is None:
+            
+            self.ingestor = Ingestor(self)
         return self.ingestor.ingest(path)
 
     def load_knowledge(self):
 
-        knowledge = Path("knowledge")
+        knowledge = Path(__file__).resolve().parents[2] / "knowledge"
 
         if not knowledge.exists():
 
