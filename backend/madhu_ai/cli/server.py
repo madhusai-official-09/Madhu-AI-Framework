@@ -1,19 +1,28 @@
 from fastapi import FastAPI
 import uvicorn
 import os
+from madhu_ai import MadhuAI
+
+print("SERVER.PY IMPORTED")
 
 def serve():
-    print("=== SERVER STARTING ===")
+    print("STEP 1 - serve() called")
 
-    print("Creating FastAPI...")
     app = FastAPI()
 
-    @app.get("/")
-    def root():
-        return {"status": "ok"}
+    print("STEP 2 - FastAPI created")
 
-    port = int(os.getenv("PORT", "8000"))
-    print(f"Using port: {port}")
+    bot = MadhuAI()
+
+    print("STEP 3 - MadhuAI created")
+
+    bot.mount(app)
+
+    print("STEP 4 - Router mounted")
+
+    port = int(os.getenv("PORT", 8000))
+
+    print(f"STEP 5 - Starting uvicorn on {port}")
 
     uvicorn.run(
         app,
