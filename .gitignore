@@ -14,8 +14,9 @@ __pycache__
 
 # React
 node_modules/
-madhu-ai-react/node_modules/
-madhu-ai-react/dist/
+frontend/node_modules/
+frontend/dist/
+frontend/.env.local
 
 # OS
 .DS_Store

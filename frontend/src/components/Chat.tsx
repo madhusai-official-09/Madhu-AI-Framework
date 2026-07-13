@@ -10,7 +10,7 @@ export default function Chat() {
   const bottomRef = useRef<HTMLDivElement>(null);
 
   const client = new MadhuAIClient({
-    apiUrl: "http://localhost:8000",
+    apiUrl: "import.meta.env.VITE_API_URL",
   });
 
   const {
@@ -28,7 +28,7 @@ export default function Chat() {
   const activeMessages = activeChat?.messages ?? [];
 
   const { input, setInput, sendMessage, loading } = useChat(
-    "http://localhost:8000",
+    "import.meta.env.VITE_API_URL",
     activeMessages,
     (messages) => updateChatMessages(activeChatId, messages),
     (title) => renameChat(activeChatId, title),

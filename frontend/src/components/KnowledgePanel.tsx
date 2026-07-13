@@ -4,7 +4,7 @@ import { Trash2 } from "lucide-react";
 
 export default function KnowledgePanel() {
   const client = new MadhuAIClient({
-    apiUrl: "http://localhost:8000",
+    apiUrl: "import.meta.env.VITE_API_URL",
   });
 
   const [files, setFiles] = useState<any[]>([]);
