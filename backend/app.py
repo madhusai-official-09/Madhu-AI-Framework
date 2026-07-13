@@ -1,7 +1,27 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
-app = FastAPI(title="MadhuAI Test")
+from madhu_ai.core.chatbot import MadhuAI
 
-@app.get("/")
-def root():
-    return {"status": "working"}
+app = FastAPI(
+    title="MadhuAI",
+    version="1.0.0"
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+print("Creating MadhuAI...")
+
+bot = MadhuAI()
+
+print("Mounting routes...")
+
+bot.mount(app)
+
+print("Backend Ready 🚀")
