@@ -2,17 +2,32 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from madhu_ai.core.chatbot import MadhuAI
+from madhu_ai.config import config
+from madhu_ai.core.logger import logger
 
 app = FastAPI(
     title="MadhuAI",
-    version="1.0.0"
+    version="2.0.0",
 )
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:3000",
+        "http://localhost:5173",
+        "https://madhu-ai-framework.vercel.app",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 @app.get("/")
 async def root():
     return {
-        "status": "working",
-        "message": "MadhuAI Backend is Live 🚀"
+        "status": "online",
+        "service": "MadhuAI v2",
     }
 
 
@@ -20,25 +35,15 @@ async def root():
 async def health():
     return {
         "status": "healthy",
-        "server": "running"
+        "provider": config.provider,
+        "model": config.model,
     }
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:3000",
-    "http://localhost:5173",
-    "https://madhu-ai-framework.vercel.app/"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
-print("Creating MadhuAI...")
+logger.info("Initializing MadhuAI...")
 
-bot = MadhuAI()
-
-print("Mounting routes...")
+bot = MadhuAI(config)
 
 bot.mount(app)
 
-print("Backend Ready 🚀")
+logger.info("MadhuAI Backend Ready 🚀")

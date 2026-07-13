@@ -1,70 +1,85 @@
-from fastapi import APIRouter, UploadFile, File
-from ..schemas.chat import ChatRequest, ChatResponse
+import json
+import shutil
+import tempfile
+
+from fastapi import APIRouter, File, HTTPException, UploadFile
 from fastapi.responses import StreamingResponse
+
+from ..core.logger import logger
+from ..schemas.chat import ChatRequest, ChatResponse
 from ..schemas.history import Message
 from .knowledge import router as knowledge_router
-import json
-import tempfile
-import shutil
 
 
 def create_router(bot):
-
     router = APIRouter()
 
     @router.get("/health")
     def health():
         return {
-            "status": "ok",
-            "sdk": "MadhuAI"
+            "status": "healthy",
+            "service": "MadhuAI",
+            "provider": bot.config.provider,
         }
-        
+
     @router.get("/history", response_model=list[Message])
     def history():
         return bot.memory.get_messages()
 
     @router.post("/chat", response_model=ChatResponse)
     def chat(request: ChatRequest):
+        try:
+            reply = bot.chat(request.message)
+            return ChatResponse(reply=reply)
 
-        reply = bot.chat(request.message)
+        except Exception as e:
+            logger.exception(e)
+            raise HTTPException(status_code=500, detail="Chat failed")
 
-        return ChatResponse(reply=reply)
-    
     @router.post("/chat/stream")
-    
     def chat_stream(request: ChatRequest):
 
         def generate():
+            try:
+                for token in bot.stream(request.message):
+                    yield f"data: {json.dumps({'token': token})}\n\n"
 
-            for token in bot.stream(request.message):
-                yield f"data: {json.dumps({'token': token})}\n\n"
+                yield "data: [DONE]\n\n"
 
-            yield "data: [DONE]\n\n"
+            except Exception as e:
+                logger.exception(e)
+                yield f"data: {json.dumps({'error':'Streaming failed'})}\n\n"
 
         return StreamingResponse(
             generate(),
             media_type="text/event-stream",
-            headers={"Cache-Control": "no-cache", "Connection": "keep-alive"},
+            headers={
+                "Cache-Control": "no-cache",
+                "Connection": "keep-alive",
+            },
         )
-        
+
     @router.post("/upload")
     def upload(file: UploadFile = File(...)):
+        try:
+            with tempfile.NamedTemporaryFile(
+                delete=False,
+                suffix=".pdf",
+            ) as temp:
 
-        with tempfile.NamedTemporaryFile(
-            delete=False,
-            suffix=".pdf",
-        ) as temp:
+                shutil.copyfileobj(file.file, temp)
+                temp_path = temp.name
 
-            shutil.copyfileobj(file.file, temp)
+            chunks = bot.add_pdf(temp_path)
 
-            path = temp.name
+            return {
+                "success": True,
+                "chunks": chunks,
+            }
 
-        chunks = bot.add_pdf(path)
-
-        return {
-            "success": True,
-            "chunks": chunks,
-        }
+        except Exception as e:
+            logger.exception(e)
+            raise HTTPException(status_code=500, detail="Upload failed")
 
     router.include_router(knowledge_router)
 

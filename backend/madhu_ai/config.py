@@ -1,10 +1,45 @@
+from dataclasses import dataclass
+from functools import lru_cache
 import os
 
-GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
+from dotenv import load_dotenv
 
-MODEL = os.getenv(
-    "MODEL",
-    "llama-3.3-70b-versatile"
-)
+from .core.constants import *
 
-PORT = int(os.getenv("PORT", "8000"))
+load_dotenv()
+
+
+@dataclass
+class Config:
+    provider: str = os.getenv("PROVIDER", "groq")
+
+    api_key: str = ""
+    model: str = ""
+
+    temperature: float = float(os.getenv("TEMPERATURE", DEFAULT_TEMPERATURE))
+    max_tokens: int = int(os.getenv("MAX_TOKENS", DEFAULT_MAX_TOKENS))
+
+    stream: bool = os.getenv("STREAM", "False").lower() == "true"
+    timeout: int = int(os.getenv("TIMEOUT", "30"))
+
+    upload_folder: str = os.getenv("UPLOAD_FOLDER", "uploads")
+    chroma_path: str = os.getenv("CHROMA_PATH", "chroma_db")
+    embedding_model: str = os.getenv(
+        "EMBEDDING_MODEL",
+        "all-MiniLM-L6-v2"
+    )
+
+    log_level: str = os.getenv("LOG_LEVEL", "INFO")
+
+    def __post_init__(self):
+        if self.provider == "groq":
+            self.api_key = os.getenv("GROQ_API_KEY", "")
+            self.model = os.getenv("GROQ_MODEL", DEFAULT_MODEL)
+
+
+@lru_cache
+def get_config():
+    return Config()
+
+
+config = get_config()

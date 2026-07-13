@@ -1,13 +1,11 @@
 services:
   - type: web
-    name: madhu-ai-backend
-
+    name: madhuai-backend
     env: python
+    plan: free
 
-    rootDir: backend
+    buildCommand: pip install -r requirements.txt
 
-    buildCommand: |
-      pip install -U pip
-      pip install -e .
+    startCommand: uvicorn app:app --host 0.0.0.0 --port $PORT
 
-    startCommand: madhu-ai serve
+    autoDeploy: true

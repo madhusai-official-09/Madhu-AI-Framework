@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+.env
+uploads/
+chroma_db/
+.vscode/
+madhu_ai.egg-info/

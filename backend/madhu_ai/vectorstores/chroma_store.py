@@ -1,34 +1,54 @@
 import uuid
+from threading import Lock
 
 import chromadb
 
-from ..core.constants import DEFAULT_DB, DEFAULT_COLLECTION
+from ..config import config
+from ..core.constants import DEFAULT_COLLECTION
 
 
 class ChromaStore:
+    _client = None
+    _collection = None
+    _lock = Lock()
 
-    def __init__(self):
+    @classmethod
+    def _initialize(cls):
+        if cls._client is None:
+            with cls._lock:
+                if cls._client is None:
+                    print("Loading ChromaDB...")
 
-        self.client = chromadb.PersistentClient(
-            path=DEFAULT_DB
-        )
+                    cls._client = chromadb.PersistentClient(
+                        path=config.chroma_path
+                    )
 
-        self.collection = self.client.get_or_create_collection(
-            name=DEFAULT_COLLECTION
-        )
+                    cls._collection = cls._client.get_or_create_collection(
+                        name=DEFAULT_COLLECTION
+                    )
 
-    def add(self, text, embedding):
+    @classmethod
+    def add(cls, text, embedding):
+        cls._initialize()
 
-        self.collection.add(
+        if hasattr(embedding, "tolist"):
+            embedding = embedding.tolist()
+
+        cls._collection.add(
             documents=[text],
-            embeddings=[embedding.tolist()],
+            embeddings=[embedding],
             ids=[str(uuid.uuid4())],
         )
 
-    def search(self, embedding, top_k=3):
+    @classmethod
+    def search(cls, embedding, top_k=3):
+        cls._initialize()
 
-        results = self.collection.query(
-            query_embeddings=[embedding.tolist()],
+        if hasattr(embedding, "tolist"):
+            embedding = embedding.tolist()
+
+        results = cls._collection.query(
+            query_embeddings=[embedding],
             n_results=top_k,
         )
 

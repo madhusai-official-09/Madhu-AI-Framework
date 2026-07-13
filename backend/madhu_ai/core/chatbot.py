@@ -41,7 +41,7 @@ class MadhuAI:
         self.pdf_loader = None
         self.website_loader = None
 
-        self.chunker = None
+        self.chunker = TextChunker()
 
         self.embedding_model = None
         self.vector_db = None
@@ -50,10 +50,10 @@ class MadhuAI:
 
         self.ingestor = None
 
-        self.plugins = None
+        self.plugins = PluginManager()
 
-        self.assistant = None
-        self.rag = None
+        self.assistant = AssistantAgent(self)
+        self.rag = RAGAgent(self)
 
         self.logger.info("MadhuAI initialized.")
 
@@ -64,7 +64,7 @@ class MadhuAI:
 
             self.logger.info("Loading embedding model...")
 
-            self.embedding_model = EmbeddingModel()
+            self.embedding_model = EmbeddingModel
 
         return self.embedding_model
     
@@ -72,7 +72,7 @@ class MadhuAI:
 
         if self.vector_db is None:
 
-            self.vector_db = ChromaStore()
+            self.vector_db = ChromaStore
 
         return self.vector_db
     
@@ -121,7 +121,7 @@ class MadhuAI:
 
         history = self.memory.get_messages()
 
-        self.logger.info("Generating response...")
+        self.logger.info(f"Generating response for: {message[:60]}")
 
         provider = self.get_provider()
 
@@ -135,6 +135,7 @@ class MadhuAI:
 
         retriever = self.get_retriever()
         
+        self.logger.info("Streaming response...")
         provider = self.get_provider()
 
         try:
@@ -225,7 +226,7 @@ class MadhuAI:
 
     def ingest(self, path):
         
-        if self.Ingestor is None:
+        if self.ingestor is None:
             
             self.ingestor = Ingestor(self)
         return self.ingestor.ingest(path)
