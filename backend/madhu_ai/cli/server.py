@@ -1,40 +1,26 @@
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 import os
 
-from madhu_ai.core.chatbot import MadhuAI
-
-
 def serve():
+    print("=" * 50)
+    print("SERVER STARTED")
+    print("=" * 50)
 
-    app = FastAPI(
-        title="Madhu AI",
-        version="1.0.0"
-    )
+    app = FastAPI()
 
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=["*"],
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-    )
-
-    bot = MadhuAI()
-
-    # DO NOT LOAD KNOWLEDGE HERE
-    # bot.load_knowledge()
-
-    bot.mount(app)
+    @app.get("/")
+    def home():
+        return {"status": "MadhuAI Backend Running"}
 
     port = int(os.getenv("PORT", 8000))
 
-    print(f"Starting server on port {port}")
+    print(f"PORT = {port}")
+    print("Starting Uvicorn...")
 
     uvicorn.run(
         app,
         host="0.0.0.0",
         port=port,
-        log_level="info",
+        log_level="debug",
     )
