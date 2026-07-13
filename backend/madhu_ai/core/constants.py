@@ -1,0 +1,11 @@
+SDK_NAME = "MadhuAI"
+SDK_VERSION = "0.1.0"
+
+DEFAULT_MODEL = "llama-3.3-70b-versatile"
+
+DEFAULT_TEMPERATURE = 0.7
+DEFAULT_MAX_TOKENS = 1024
+
+DEFAULT_DB = "./database"
+
+DEFAULT_COLLECTION = "madhu_ai"

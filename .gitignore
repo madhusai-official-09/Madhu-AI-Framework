@@ -1,0 +1,26 @@
+.venv
+.env
+build
+dist
+.env.*
+!.env.example
+
+__pycache__
+*.pyc
+*.pyo
+*.sqlite3
+*.db
+*.egg-info
+
+# React
+node_modules/
+madhu-ai-react/node_modules/
+madhu-ai-react/dist/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/

@@ -1,0 +1,66 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "madhu-ai"
+version = "1.0.0"
+description = "An open-source AI framework with Groq, FastAPI, RAG, ChromaDB and React SDK."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+
+authors = [
+    { name = "Pitani Madhusayi" }
+]
+
+keywords = [
+    "AI",
+    "LLM",
+    "Groq",
+    "FastAPI",
+    "RAG",
+    "ChromaDB",
+    "Chatbot",
+    "React",
+    "Python"
+]
+
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+dependencies = [
+    "fastapi>=0.115.0",
+    "uvicorn>=0.35.0",
+    "python-dotenv>=1.0.1",
+    "httpx>=0.28.1",
+    "openai>=1.0.0",
+    "groq>=0.30.0",
+    "pypdf>=5.0.0",
+    "sentence-transformers>=5.0.0",
+    "chromadb>=1.0.15",
+    "python-multipart>=0.0.20",
+    "beautifulsoup4>=4.13.4",
+    "requests>=2.32.4",
+]
+
+[project.urls]
+Homepage="https://github.com/madhusai-official-09/Madhu-AI-Framework"
+
+Repository="https://github.com/madhusai-official-09/Madhu-AI-Framework"
+
+Issues="https://github.com/madhusai-official-09/Madhu-AI-Framework/issues"
+
+[project.scripts]
+madhu-ai = "madhu_ai.cli.main:main"
+
+[tool.setuptools.packages.find]
+include = ["madhu_ai*"]

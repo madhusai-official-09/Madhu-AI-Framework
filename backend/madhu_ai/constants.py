@@ -1,0 +1,5 @@
+APP_NAME = "Madhu AI"
+
+API_PREFIX = "/api"
+
+MAX_HISTORY = 20

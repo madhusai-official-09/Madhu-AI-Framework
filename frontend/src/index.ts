@@ -1,0 +1,1 @@
+export { default as MadhuAIChat } from "./components/Chat";

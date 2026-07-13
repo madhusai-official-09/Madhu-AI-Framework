@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+python-dotenv
+httpx
+openai
+groq
+pypdf
+sentence-transformers
+chromadb
+python-multipart
+beautifulsoup4
+requests

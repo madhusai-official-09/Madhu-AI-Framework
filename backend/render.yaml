@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: madhu-ai-backend
+
+    env: python
+
+    rootDir: backend
+
+    buildCommand: |
+      pip install -U pip
+      pip install -e .
+
+    startCommand: madhu-ai serve

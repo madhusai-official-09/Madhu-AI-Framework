@@ -1,0 +1,7 @@
+Hi, I'm Madhu.
+
+I'm a Python Full Stack Developer.
+
+I build AI applications using Groq, FastAPI, and Next.js.
+
+This text will be used for RAG.
