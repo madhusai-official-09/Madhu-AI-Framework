@@ -16,6 +16,7 @@ app.add_middleware(
         "http://localhost:3000",
         "http://localhost:5173",
         "https://madhu-ai-framework.vercel.app",
+        "https://madhu-ai-framework-51atyrs0n-madhusai-official-09s-projects.vercel.app",
     ],
     allow_credentials=True,
     allow_methods=["*"],
