@@ -107,15 +107,15 @@ class MadhuAI:
 
     def chat(self, message: str) -> str:
 
-        retriever = self.get_retriever()
+        # retriever = self.get_retriever()
 
-        try:
-            results = retriever.retrieve(message)
-        except Exception:
-            self.logger.exception("Retriever failed")
-            results = []
+        # try:
+        #     results = retriever.retrieve(message)
+        # except Exception:
+        #     self.logger.exception("Retriever failed")
+        #     results = []
 
-        context = "\n\n".join(results)
+        context = ""
 
         prompt = PromptBuilder.build(
             context=context,
@@ -138,18 +138,11 @@ class MadhuAI:
 
     def stream(self, message: str):
 
-        retriever = self.get_retriever()
-        
         self.logger.info("Streaming response...")
+
         provider = self.get_provider()
 
-        try:
-            results = retriever.retrieve(message)
-        except Exception:
-            self.logger.exception("Retriever failed")
-            results = []
-
-        context = "\n\n".join(results)
+        context = ""
 
         prompt = PromptBuilder.build(
             context=context,
