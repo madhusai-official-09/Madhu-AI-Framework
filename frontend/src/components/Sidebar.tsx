@@ -1,6 +1,7 @@
-import { Trash2, MessageSquarePlus } from "lucide-react";
+import { Trash2, MessageSquarePlus, MessageSquare } from "lucide-react";
 import type { Chat } from "../types/Chat";
 import KnowledgePanel from "./KnowledgePanel";
+import { motion } from "framer-motion";
 
 interface SidebarProps {
   chats: Chat[];
@@ -18,12 +19,40 @@ export default function Sidebar({
   onDelete,
 }: SidebarProps) {
   return (
-    <aside className="w-72 h-screen bg-zinc-900 border-r border-zinc-800 flex flex-col">
+    <motion.aside
+      initial={{ x: -40, opacity: 0 }}
+      animate={{ x: 0, opacity: 1 }}
+      transition={{ duration: 0.35 }}
+      className="w-72 h-screen bg-[#111827]
+               border-r border-white/10
+               flex flex-col"
+    >
       {/* Header */}
-      <div className="p-4 border-b border-zinc-800">
+      <div className="p-5 border-b border-white/10">
+        <div className="mb-6 flex items-center gap-3">
+          <div
+            className="h-12 w-12 rounded-xl
+      bg-gradient-to-r from-purple-600 to-cyan-500
+      flex items-center justify-center
+      text-2xl shadow-lg"
+          >
+            🚀
+          </div>
+
+          <div>
+            <h2 className="text-xl font-bold text-white">MadhuAI</h2>
+
+            <p className="text-sm text-zinc-400">AI Framework</p>
+          </div>
+        </div>
+
         <button
           onClick={onNewChat}
-          className="w-full flex items-center justify-center gap-2 rounded-xl bg-blue-600 hover:bg-blue-700 py-3 transition"
+          className="w-full flex items-center justify-center gap-2
+    rounded-xl bg-linear-to-r from-purple-600 to-cyan-500
+    py-3 font-semibold
+    hover:scale-[1.02]
+    transition-all duration-300"
         >
           <MessageSquarePlus size={18} />
           New Chat
@@ -35,15 +64,18 @@ export default function Sidebar({
         {chats.map((chat) => (
           <div
             key={chat.id}
-            className={`group flex items-center justify-between rounded-xl px-3 py-3 transition cursor-pointer ${
-              activeChatId === chat.id ? "bg-zinc-800" : "hover:bg-zinc-800"
+            className={`group flex items-center justify-between rounded-xl px-3 py-3 transition-all cursor-pointer duration-300 hover:scale-1.02 ${
+              activeChatId === chat.id
+                ? "bg-white/10 backdrop-blur-lg border border-white/10"
+                : "hover:bg-white/5"
             }`}
           >
             <button
               onClick={() => onSelect(chat.id)}
               className="flex-1 text-left truncate"
             >
-              💬 {chat.title}
+              <MessageSquare size={18} />
+              {chat.title}
             </button>
 
             <button
@@ -62,10 +94,13 @@ export default function Sidebar({
       </div>
 
       {/* Footer */}
-      <div className="border-t border-zinc-800 p-4 text-center text-xs text-zinc-500">
-        <div className="font-semibold">🚀 MadhuAI v1.0</div>
-        <div className="mt-1">Powered by Groq</div>
+      <div className="space-y-2">
+        <div className="font-bold text-white">MadhuAI v2</div>
+
+        <div className="text-green-400">🟢 Online</div>
+
+        <div className="text-zinc-500">Powered by Groq</div>
       </div>
-    </aside>
+    </motion.aside>
   );
 }
