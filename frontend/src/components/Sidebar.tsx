@@ -32,7 +32,7 @@ export default function Sidebar({
         <div className="mb-6 flex items-center gap-3">
           <div
             className="h-12 w-12 rounded-xl
-      bg-gradient-to-r from-purple-600 to-cyan-500
+      bg-linear-to-r from-purple-600 to-cyan-500
       flex items-center justify-center
       text-2xl shadow-lg"
           >

@@ -15,7 +15,7 @@ export default function Header() {
         <div className="flex items-center gap-3">
 
           <div className="flex h-12 w-12 items-center justify-center rounded-xl
-                          bg-gradient-to-r from-purple-600 to-cyan-500 shadow-lg">
+                          bg-linear-to-r from-purple-600 to-cyan-500 shadow-lg">
 
             <Bot size={28} className="text-white" />
 
