@@ -225,7 +225,7 @@ function ConnectionPill({
     },
     checking: {
       icon: <Wifi className="size-3" />,
-      label: "Connecting€¦",
+      label: "Connecting…",
       color: "text-amber-400 bg-amber-500/10 border-amber-500/20",
       dot: "bg-amber-500 animate-pulse",
     },
