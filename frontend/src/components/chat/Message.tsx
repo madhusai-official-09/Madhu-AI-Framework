@@ -1,9 +1,8 @@
-﻿import { lazy, Suspense, memo } from "react";
+﻿import { lazy, Suspense, memo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Bot, Copy, RotateCcw, User, Check, AlertCircle } from "lucide-react";
 import type { ChatMessage } from "../../types";
 import { formatTime, cn } from "../../utils/format";
-import { useState } from "react";
 
 const MarkdownRenderer = lazy(() => import("./MarkdownRenderer"));
 
@@ -24,19 +23,15 @@ function MessageInner({ message, onRegenerate, canRegenerate }: MessageProps) {
   };
 
   return (
-    <motion.div
-      layout
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ type: "spring", damping: 25, stiffness: 220 }}
+    <div
       className={cn(
-        "group relative flex gap-3 sm:gap-4 py-4",
+        "group relative flex gap-3 py-3 sm:gap-4 sm:py-4",
         isUser ? "justify-end" : "justify-start",
       )}
       data-testid={`message-${message.role}`}
     >
       {!isUser && (
-        <div className="mt-1 flex size-8 shrink-0 items-center justify-center rounded-lg bg-linear-to-br from-indigo-500 via-blue-500 to-cyan-400 text-white shadow-md">
+        <div className="mt-1 flex size-8 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.06] text-foreground shadow-sm backdrop-blur-md">
           <Bot className="size-4" />
         </div>
       )}
@@ -44,24 +39,26 @@ function MessageInner({ message, onRegenerate, canRegenerate }: MessageProps) {
       <div
         className={cn(
           "min-w-0 flex flex-col gap-1.5",
-          isUser ? "items-end max-w-[85%]" : "items-start flex-1",
+          isUser
+            ? "max-w-[85%] items-end sm:max-w-[78%]"
+            : "flex-1 items-start",
         )}
       >
         {isUser ? (
           <div
-            className="rounded-2xl rounded-br-sm border border-border bg-secondary/70 px-4 py-3 text-[15px] text-foreground shadow-sm whitespace-pre-wrap break-words"
+            className="rounded-2xl rounded-br-md border border-white/10 bg-white/[0.08] px-4 py-3 text-[15px] leading-6 text-foreground shadow-sm backdrop-blur-md whitespace-pre-wrap break-words"
             data-testid="user-bubble"
           >
             {message.content}
           </div>
         ) : (
           <div
-            className="w-full text-foreground"
+            className="w-full min-w-0 text-foreground"
             data-testid="assistant-bubble"
           >
             <Suspense
               fallback={
-                <div className="h-4 w-2/3 rounded shimmer bg-muted/30" />
+                <div className="h-5 w-2/3 rounded-md bg-white/[0.06] shimmer" />
               }
             >
               <MarkdownRenderer
@@ -69,16 +66,18 @@ function MessageInner({ message, onRegenerate, canRegenerate }: MessageProps) {
                 streaming={message.streaming}
               />
             </Suspense>
+
             {message.streaming && !message.content && (
-              <div className="flex items-center gap-1.5 text-muted-foreground text-sm">
-                <span className="inline-block size-1.5 rounded-full bg-foreground/80 animate-bounce [animation-delay:-200ms]" />
-                <span className="inline-block size-1.5 rounded-full bg-foreground/80 animate-bounce [animation-delay:-100ms]" />
-                <span className="inline-block size-1.5 rounded-full bg-foreground/80 animate-bounce" />
+              <div className="flex items-center gap-1.5 py-1 text-muted-foreground">
+                <span className="size-1.5 animate-bounce rounded-full bg-foreground/70 [animation-delay:-200ms]" />
+                <span className="size-1.5 animate-bounce rounded-full bg-foreground/70 [animation-delay:-100ms]" />
+                <span className="size-1.5 animate-bounce rounded-full bg-foreground/70" />
               </div>
             )}
+
             {message.error && (
-              <div className="mt-2 flex items-start gap-2 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300">
-                <AlertCircle className="size-4 mt-0.5" />
+              <div className="mt-3 flex items-start gap-2 rounded-xl border border-red-500/20 bg-red-500/[0.08] px-3 py-2.5 text-sm text-red-300">
+                <AlertCircle className="mt-0.5 size-4 shrink-0" />
                 <span>{message.error}</span>
               </div>
             )}
@@ -87,13 +86,14 @@ function MessageInner({ message, onRegenerate, canRegenerate }: MessageProps) {
 
         <div
           className={cn(
-            "flex items-center gap-1",
+            "flex min-h-5 items-center gap-1.5",
             isUser ? "flex-row-reverse" : "flex-row",
           )}
         >
-          <span className="text-[10px] text-muted-foreground tabular-nums">
+          <span className="text-[10px] tabular-nums text-muted-foreground/60">
             {formatTime(message.createdAt)}
           </span>
+
           <AnimatePresence>
             {!message.streaming && message.content && (
               <motion.div
@@ -101,13 +101,13 @@ function MessageInner({ message, onRegenerate, canRegenerate }: MessageProps) {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 className={cn(
-                  "flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity",
+                  "flex items-center gap-0.5 opacity-0 transition-opacity duration-150 group-hover:opacity-100",
                   isUser ? "flex-row-reverse" : "flex-row",
                 )}
               >
                 <button
                   onClick={copy}
-                  className="rounded-md p-1 text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
+                  className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-white/[0.08] hover:text-foreground"
                   aria-label="Copy"
                   data-testid={`copy-btn-${message.id}`}
                 >
@@ -117,10 +117,11 @@ function MessageInner({ message, onRegenerate, canRegenerate }: MessageProps) {
                     <Copy className="size-3" />
                   )}
                 </button>
+
                 {!isUser && canRegenerate && (
                   <button
                     onClick={onRegenerate}
-                    className="rounded-md p-1 text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
+                    className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-white/[0.08] hover:text-foreground"
                     aria-label="Regenerate"
                     data-testid={`regenerate-btn-${message.id}`}
                   >
@@ -134,15 +135,14 @@ function MessageInner({ message, onRegenerate, canRegenerate }: MessageProps) {
       </div>
 
       {isUser && (
-        <div className="mt-1 flex size-8 shrink-0 items-center justify-center rounded-lg border border-border bg-secondary text-foreground">
+        <div className="mt-1 flex size-8 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.06] text-foreground shadow-sm backdrop-blur-md">
           <User className="size-4" />
         </div>
       )}
-    </motion.div>
+    </div>
   );
 }
 
 const Message = memo(MessageInner);
+
 export default Message;
-
-
