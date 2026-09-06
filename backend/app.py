@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
+from madhu_ai.core.firebase import *
 from madhu_ai.core.chatbot import MadhuAI
 from madhu_ai.config import config
 from madhu_ai.core.logger import logger

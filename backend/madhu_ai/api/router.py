@@ -2,9 +2,9 @@ import json
 import shutil
 import tempfile
 
-from fastapi import APIRouter, File, HTTPException, UploadFile
+from fastapi import APIRouter, Depends,File, HTTPException, UploadFile
 from fastapi.responses import StreamingResponse
-
+from .auth import get_current_user
 from ..core.logger import logger
 from ..schemas.chat import ChatRequest, ChatResponse
 from ..schemas.history import Message
@@ -23,11 +23,13 @@ def create_router(bot):
         }
 
     @router.get("/history", response_model=list[Message])
-    def history():
+    def history(current_user=Depends(get_current_user)):
         return bot.memory.get_messages()
 
     @router.post("/chat", response_model=ChatResponse)
-    def chat(request: ChatRequest):
+    def chat(request: ChatRequest,
+             current_user=Depends(get_current_user),
+             ):
         try:
             reply = bot.chat(request.message)
             return ChatResponse(reply=reply)
@@ -37,7 +39,8 @@ def create_router(bot):
             raise HTTPException(status_code=500, detail="Chat failed")
 
     @router.post("/chat/stream")
-    def chat_stream(request: ChatRequest):
+    def chat_stream(request: ChatRequest,
+                    current_user=Depends(get_current_user),):
 
         def generate():
             try:
@@ -60,7 +63,8 @@ def create_router(bot):
         )
 
     @router.post("/upload")
-    def upload(file: UploadFile = File(...)):
+    def upload(file: UploadFile = File(...),
+               current_user=Depends(get_current_user),):
         try:
             with tempfile.NamedTemporaryFile(
                 delete=False,
