@@ -9,10 +9,12 @@ import OGLBackground from "./components/backgrounds/OGLBackground";
 import Login from "./components/auth/Login";
 import Register from "./components/auth/Register";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
+import PublicRoute from "./components/auth/PublicRoute";
 
 import { useUIStore } from "./store/useUIStore";
-import { ping } from "./api/client";
-import PublicRoute from "./components/auth/PublicRoute";
+import { ping, getHistory } from "./api/client";
+import { useAuth } from "./context/AuthContext";
+import { useChatStore } from "./store/useChatStore";
 
 const KnowledgePanel = lazy(
   () => import("./components/knowledge/KnowledgePanel"),
@@ -70,11 +72,55 @@ function MainApp() {
 }
 
 export default function App() {
+  const { user, loading } = useAuth();
+
+  const hydrateFromHistory = useChatStore(
+    (s) => s.hydrateFromHistory,
+  );
+
+  const clearAll = useChatStore((s) => s.clearAll);
+
+  useEffect(() => {
+    if (loading) return;
+
+    // No Firebase user → clear chat from memory
+    if (!user) {
+      clearAll();
+      return;
+    }
+
+    // Firebase user exists → load that user's backend history
+    let cancelled = false;
+
+    const loadHistory = async () => {
+      try {
+        const history = await getHistory();
+
+        if (cancelled) return;
+
+        hydrateFromHistory(history);
+
+      } catch (error) {
+        console.error("Failed to load chat history:", error);
+
+        if (!cancelled) {
+          clearAll();
+        }
+      }
+    };
+
+    loadHistory();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.uid, loading, hydrateFromHistory, clearAll]);
+
   return (
     <BrowserRouter>
       <Routes>
         {/* Public */}
-        <Route element={<PublicRoute/>}>
+        <Route element={<PublicRoute />}>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
         </Route>

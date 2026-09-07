@@ -132,7 +132,19 @@ export default function Navbar() {
             aria-label="GitHub repository"
             data-testid="github-link"
           >
-            <Github className="rounded-xl border border-transparent p-2 text-muted-foreground transition-all duration-200 hover:border-white/0.08 hover:bg-white/0.06 hover:text-foreground" />
+            <Github
+              className="
+    h-5 w-5
+    rounded-xl
+    border border-transparent
+    p-0
+    text-muted-foreground
+    transition-all duration-200
+    hover:border-white/10
+    hover:bg-white/5
+    hover:text-foreground
+  "
+            />
           </a>
           <div className="relative ml-1">
             <Magnet

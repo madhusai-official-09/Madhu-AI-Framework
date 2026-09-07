@@ -25,3 +25,13 @@ Thumbs.db
 # IDE
 .vscode/
 .idea/
+
+# Local chat/conversation data
+backend/data/
+
+# TypeScript build info
+**/*.tsbuildinfo
+
+# Firebase service account credentials
+firebase-service-account.json
+*-firebase-adminsdk-*.json

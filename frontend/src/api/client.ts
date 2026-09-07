@@ -32,6 +32,7 @@ export async function ping(): Promise<boolean> {
   try {
     const res = await fetch(url("/knowledge"), {
       method: "GET",
+      headers: await authHeaders(),
     });
 
     return res.ok;
@@ -72,11 +73,7 @@ export async function sendChat(
   return typeof data === "string" ? data : "";
 }
 
-/**
- * Streams a chat completion from POST /chat/stream.
- * Handles both raw text streams and SSE-style `data: ...` payloads.
- * Yields text tokens as they arrive.
- */
+
 export async function* streamChat(
   message: string,
   signal?: AbortSignal,
@@ -268,7 +265,9 @@ export async function deleteKnowledge(filename: string): Promise<void> {
   }
 }
 
-export async function getHistory(): Promise<unknown[]> {
+export async function getHistory(): Promise<
+  { role: "user" | "assistant"; content: string }[]
+> {
   const res = await fetch(url("/history"), {
     headers: await authHeaders(),
   });
@@ -277,11 +276,19 @@ export async function getHistory(): Promise<unknown[]> {
     throw new Error(`History failed (${res.status})`);
   }
 
-  const data = await safeJson(res);
+  const data: unknown = await safeJson(res);
 
-  if (Array.isArray(data)) {
-    return data;
+  if (!Array.isArray(data)) {
+    return [];
   }
 
-  return [];
+  return data.filter(
+    (item): item is { role: "user" | "assistant"; content: string } =>
+      typeof item === "object" &&
+      item !== null &&
+      "role" in item &&
+      "content" in item &&
+      (item.role === "user" || item.role === "assistant") &&
+      typeof item.content === "string",
+  );
 }

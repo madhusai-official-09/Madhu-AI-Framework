@@ -24,6 +24,10 @@ def create_router(bot):
 
     @router.get("/history", response_model=list[Message])
     def history(current_user=Depends(get_current_user)):
+        user_id = current_user["uid"]
+        
+        bot.memory.load_user(user_id)
+        
         return bot.memory.get_messages()
 
     @router.post("/chat", response_model=ChatResponse)
@@ -31,7 +35,9 @@ def create_router(bot):
              current_user=Depends(get_current_user),
              ):
         try:
-            reply = bot.chat(request.message)
+            user_id = current_user["uid"]
+            
+            reply = bot.chat(request.message,user_id,)
             return ChatResponse(reply=reply)
 
         except Exception as e:
@@ -44,7 +50,8 @@ def create_router(bot):
 
         def generate():
             try:
-                for token in bot.stream(request.message):
+                user_id = current_user["uid"]
+                for token in bot.stream(request.message,user_id,):
                     yield f"data: {json.dumps({'token': token})}\n\n"
 
                 yield "data: [DONE]\n\n"

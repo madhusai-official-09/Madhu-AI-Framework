@@ -184,8 +184,7 @@ export default function Login() {
                   h-11 w-full rounded-xl
                   border border-white/10
                   bg-white/0.06
-                  px-3
-                  text-sm
+                  px-3 text-sm
                   outline-none
                   transition
                   placeholder:text-muted-foreground
@@ -225,13 +224,12 @@ export default function Login() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
+                placeholder="Password"
                 className="
                   h-11 w-full rounded-xl
                   border border-white/10
                   bg-white/0.06
-                  px-3
-                  text-sm
+                  px-3 text-sm
                   outline-none
                   transition
                   placeholder:text-muted-foreground
@@ -355,12 +353,6 @@ function getAuthError(code: string) {
     case "auth/popup-blocked":
       return "Your browser blocked the Google sign-in popup.";
 
-    case "auth/user-not-found":
-      return "No account was found with this email.";
-
-    case "auth/invalid-email":
-      return "Please enter a valid email address.";
-      
     case "auth/missing-email":
       return "Enter your email address first.";
 
@@ -368,3 +360,4 @@ function getAuthError(code: string) {
       return "Something went wrong. Please try again.";
   }
 }
+
