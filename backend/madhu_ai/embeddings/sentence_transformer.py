@@ -1,30 +1,43 @@
-from threading import Lock
+import os
 
-from sentence_transformers import SentenceTransformer
-
-from ..config import config
+import numpy as np
+from huggingface_hub import InferenceClient
 
 
 class EmbeddingModel:
-    _model = None
-    _lock = Lock()
+    _client = None
 
     @classmethod
-    def _get_model(cls):
-        if cls._model is None:
-            with cls._lock:
-                if cls._model is None:
-                    print("Loading SentenceTransformer...")
+    def _get_client(cls):
+        if cls._client is None:
+            token = os.getenv("HF_TOKEN")
 
-                    cls._model = SentenceTransformer(
-                        config.embedding_model
-                    )
+            if not token:
+                raise RuntimeError("HF_TOKEN is not configured.")
 
-                    print("SentenceTransformer loaded successfully.")
+            cls._client = InferenceClient(
+                provider="hf-inference",
+                api_key=token,
+            )
 
-        return cls._model
+        return cls._client
 
     @classmethod
     def embed(cls, text):
-        model = cls._get_model()
-        return model.encode(text).tolist()
+        client = cls._get_client()
+
+        result = client.feature_extraction(
+            text,
+            model="sentence-transformers/all-MiniLM-L6-v2",
+        )
+
+        result = np.asarray(result)
+
+        # Hugging Face may return token-level embeddings:
+        # [tokens, dimensions]
+        # Convert them into one sentence embedding:
+        # [dimensions]
+        if result.ndim == 2:
+            result = result.mean(axis=0)
+
+        return result.tolist()
