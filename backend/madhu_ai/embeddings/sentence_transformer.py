@@ -1,8 +1,9 @@
 from threading import Lock
 
+from sentence_transformers import SentenceTransformer
+
 from ..config import config
 
-from sentence_transformers import SentenceTransformer
 
 class EmbeddingModel:
     _model = None
@@ -14,15 +15,12 @@ class EmbeddingModel:
             with cls._lock:
                 if cls._model is None:
                     print("Loading SentenceTransformer...")
-                    try:
-                        from sentence_transformers import SentenceTransformer
-                    except Exception as e:
-                        raise ImportError(
-                            "sentence_transformers is required to use EmbeddingModel: "
-                            + str(e)
-                        )
 
-                    cls._model = SentenceTransformer(config.embedding_model)
+                    cls._model = SentenceTransformer(
+                        config.embedding_model
+                    )
+
+                    print("SentenceTransformer loaded successfully.")
 
         return cls._model
 

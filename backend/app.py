@@ -45,6 +45,8 @@ logger.info("Initializing MadhuAI...")
 
 bot = MadhuAI(config)
 
+bot.get_embedding_model()._get_model()
+
 bot.mount(app)
 
 logger.info("MadhuAI Backend Ready 🚀")
