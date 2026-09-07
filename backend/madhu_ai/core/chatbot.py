@@ -105,12 +105,12 @@ class MadhuAI:
 
         return self.retriever
 
-    def chat(self, message: str, user_id: str) -> str:
+    def chat(self, message: str, user_id: str, project_id: str,) -> str:
 
         retriever = self.get_retriever()
 
         try:
-            results = retriever.retrieve(message)
+            results = retriever.retrieve(message,project_id,)
             
             self.logger.info(f"RAG results found: {len(results)}")
             self.logger.info(f"RAG context: {results[:1]}")
@@ -142,14 +142,14 @@ class MadhuAI:
 
         return reply
 
-    def stream(self, message: str, user_id: str):
+    def stream(self, message: str, user_id: str, project_id: str,):
 
         self.logger.info("Streaming response...")
 
         retriever = self.get_retriever()
 
         try:
-            results = retriever.retrieve(message)
+            results = retriever.retrieve(message, project_id,)
 
             self.logger.info(f"RAG results found: {len(results)}")
             self.logger.info(f"RAG context: {results[:1]}")
@@ -194,7 +194,7 @@ class MadhuAI:
 
         return self._index_document(text)
 
-    def add_pdf(self, path: str):
+    def add_pdf(self, path: str, project_id: str,):
 
         if self.pdf_loader is None:
 
@@ -204,7 +204,7 @@ class MadhuAI:
 
         text = self.pdf_loader.load(path)
 
-        return self._index_document(text)
+        return self._index_document(text, project_id,)
 
     def add_website(self, url: str):
 
@@ -218,7 +218,7 @@ class MadhuAI:
 
         return self._index_document(text)
 
-    def _index_document(self, text: str):
+    def _index_document(self, text: str, project_id:str,):
         
         embedding_model = self.get_embedding_model()
         
@@ -228,6 +228,7 @@ class MadhuAI:
 
         self.logger.info(
             f"Created {len(chunks)} chunks."
+            f"for project {project_id}."
         )
 
         for chunk in chunks:
@@ -237,6 +238,7 @@ class MadhuAI:
             vector_db.add(
                 chunk,
                 embedding,
+                project_id,
             )
 
         return len(chunks)

@@ -36,8 +36,9 @@ def create_router(bot):
              ):
         try:
             user_id = current_user["uid"]
+            project_id = current_user["uid"]
             
-            reply = bot.chat(request.message,user_id,)
+            reply = bot.chat(request.message,user_id, project_id,)
             return ChatResponse(reply=reply)
 
         except Exception as e:
@@ -51,7 +52,9 @@ def create_router(bot):
         def generate():
             try:
                 user_id = current_user["uid"]
-                for token in bot.stream(request.message,user_id,):
+                project_id = current_user["uid"]
+                
+                for token in bot.stream(request.message,user_id, project_id,):
                     yield f"data: {json.dumps({'token': token})}\n\n"
 
                 yield "data: [DONE]\n\n"
@@ -81,7 +84,9 @@ def create_router(bot):
                 shutil.copyfileobj(file.file, temp)
                 temp_path = temp.name
 
-            chunks = bot.add_pdf(temp_path)
+            project_id = current_user["uid"]
+            
+            chunks = bot.add_pdf(temp_path,project_id,)
 
             return {
                 "success": True,

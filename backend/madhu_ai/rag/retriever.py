@@ -7,13 +7,14 @@ class Retriever:
         self.embedding_model = embedding_model
         self.vector_db = vector_db
 
-    def retrieve(self, question, top_k=3):
+    def retrieve(self, question, project_id, top_k=3):
         try:
             embedding = self.embedding_model.embed(question)
 
             documents = self.vector_db.search(
                 embedding,
-                top_k
+                project_id,
+                top_k,
             )
 
             return documents

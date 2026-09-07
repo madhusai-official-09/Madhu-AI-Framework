@@ -1,15 +1,15 @@
+import re
 import uuid
 from threading import Lock
 
 import chromadb
 
 from ..config import config
-from ..core.constants import DEFAULT_COLLECTION
 
 
 class ChromaStore:
     _client = None
-    _collection = None
+    _collections = {}
     _lock = Lock()
 
     @classmethod
@@ -23,31 +23,57 @@ class ChromaStore:
                         path=config.chroma_path
                     )
 
-                    cls._collection = cls._client.get_or_create_collection(
-                        name=DEFAULT_COLLECTION
-                    )
+    @classmethod
+    def _collection_name(cls, project_id):
+        safe_project_id = re.sub(
+            r"[^a-zA-Z0-9_-]",
+            "_",
+            project_id,
+        )
+
+        return f"madhuai_project_{safe_project_id}"
 
     @classmethod
-    def add(cls, text, embedding):
+    def _get_collection(cls, project_id):
         cls._initialize()
+
+        if not project_id:
+            raise ValueError("project_id is required.")
+
+        if project_id not in cls._collections:
+            with cls._lock:
+                if project_id not in cls._collections:
+                    name = cls._collection_name(project_id)
+
+                    cls._collections[project_id] = (
+                        cls._client.get_or_create_collection(
+                            name=name
+                        )
+                    )
+
+        return cls._collections[project_id]
+
+    @classmethod
+    def add(cls, text, embedding, project_id):
+        collection = cls._get_collection(project_id)
 
         if hasattr(embedding, "tolist"):
             embedding = embedding.tolist()
 
-        cls._collection.add(
+        collection.add(
             documents=[text],
             embeddings=[embedding],
             ids=[str(uuid.uuid4())],
         )
 
     @classmethod
-    def search(cls, embedding, top_k=3):
-        cls._initialize()
+    def search(cls, embedding, project_id, top_k=3):
+        collection = cls._get_collection(project_id)
 
         if hasattr(embedding, "tolist"):
             embedding = embedding.tolist()
 
-        results = cls._collection.query(
+        results = collection.query(
             query_embeddings=[embedding],
             n_results=top_k,
         )
