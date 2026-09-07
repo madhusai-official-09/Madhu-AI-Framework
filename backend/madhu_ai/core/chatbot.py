@@ -107,16 +107,22 @@ class MadhuAI:
 
     def chat(self, message: str, user_id: str) -> str:
 
-        # retriever = self.get_retriever()
+        retriever = self.get_retriever()
 
-        # try:
-        #     results = retriever.retrieve(message)
-        # except Exception:
-        #     self.logger.exception("Retriever failed")
-        #     results = []
+        try:
+            results = retriever.retrieve(message)
+            
+            self.logger.info(f"RAG results found: {len(results)}")
+            self.logger.info(f"RAG context: {results[:1]}")
+
+        except Exception:
+            self.logger.exception("Retriever failed")
+            results = []
 
         self.memory.load_user(user_id)
-        context = ""
+        
+        context = "\n\n".join(str(result) for result in results)
+        
         prompt = PromptBuilder.build(
             context=context,
             question=message,
@@ -139,18 +145,29 @@ class MadhuAI:
     def stream(self, message: str, user_id: str):
 
         self.logger.info("Streaming response...")
-        
+
+        retriever = self.get_retriever()
+
+        try:
+            results = retriever.retrieve(message)
+
+            self.logger.info(f"RAG results found: {len(results)}")
+            self.logger.info(f"RAG context: {results[:1]}")
+
+        except Exception:
+            self.logger.exception("Retriever failed")
+            results = []
+
         self.memory.load_user(user_id)
 
         provider = self.get_provider()
 
-        context = ""
+        context = "\n\n".join(results)
 
         prompt = PromptBuilder.build(
             context=context,
             question=message,
         )
-
         self.memory.add_user_message(prompt)
 
         full_response = ""
