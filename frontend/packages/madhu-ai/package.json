@@ -1,0 +1,34 @@
+{
+  "name": "madhu-ai",
+  "version": "1.0.0",
+  "description": "Embeddable MadhuAI chatbot widget for websites",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc"
+  },
+  "keywords": [
+    "ai",
+    "chatbot",
+    "rag",
+    "widget",
+    "madhuai"
+  ],
+  "author": "MadhuAI",
+  "license": "MIT",
+  "dependencies": {
+    "lucide-react": "^1.43.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.7",
+    "typescript": "^7.0.2"
+  }
+}
