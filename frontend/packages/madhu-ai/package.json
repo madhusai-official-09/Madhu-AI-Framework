@@ -1,16 +1,23 @@
 {
   "name": "madhu-ai",
-  "version": "1.0.0",
+  "version": "1.0.5",
   "description": "Embeddable MadhuAI chatbot widget for websites",
   "type": "module",
-  "main": "./dist/index.js",
-  "module": "./dist/index.js",
+  "main": "./dist/madhu-ai.js",
+  "module": "./dist/madhu-ai.js",
   "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/madhu-ai.js"
+    },
+    "./style.css": "./dist/madhu-ai.css"
+  },
   "files": [
     "dist"
   ],
   "scripts": {
-    "build": "tsc"
+    "build": "vite build"
   },
   "keywords": [
     "ai",
@@ -27,8 +34,13 @@
     "react-dom": "^19.2.8"
   },
   "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.7",
-    "typescript": "^7.0.2"
+    "@vitejs/plugin-react": "^6.1.1",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^6.0.3",
+    "vite": "^8.2.2",
+    "vite-plugin-dts": "^5.1.0"
   }
 }
