@@ -71,6 +71,9 @@ class ChromaStore:
     def search(cls, embedding, project_id, top_k=3):
         collection = cls._get_collection(project_id)
 
+        print("CHROMA PROJECT:", project_id)
+        print("CHROMA COUNT:", collection.count())
+        
         if hasattr(embedding, "tolist"):
             embedding = embedding.tolist()
 
