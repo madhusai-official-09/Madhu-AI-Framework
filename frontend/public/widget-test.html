@@ -1,0 +1,24 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MadhuAI Widget Test</title>
+    <link rel="stylesheet" href="./dist/madhu-ai-widget.css" />
+  </head>
+
+  <body>
+    <h1>MadhuAI Widget Test</h1>
+
+    <div id="madhu-ai-widget"></div>
+
+    <script type="module">
+      import { mountMadhuAIWidget } from "/widget/madhu-ai-widget.js";
+
+      mountMadhuAIWidget(document.getElementById("madhu-ai-widget"), {
+        projectId: "e08a9a22-39ee-4080-afba-d2bbe59a1d07",
+        backendUrl: "https://madhu-ai-backend.onrender.com",
+      });
+    </script>
+  </body>
+</html>
