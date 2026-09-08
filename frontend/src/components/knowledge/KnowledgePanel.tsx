@@ -224,7 +224,7 @@ export default function KnowledgePanel() {
 
           {loading && docs.length === 0 ? (
             <div className="flex items-center justify-center py-10 text-muted-foreground text-sm">
-              <Loader2 className="mr-2 size-4 animate-spin" /> Loading€¦
+              <Loader2 className="mr-2 size-4 animate-spin" /> Loading...
             </div>
           ) : docs.length === 0 ? (
             <div className="rounded-xl border border-dashed border-border p-4 text-center text-xs text-muted-foreground">
