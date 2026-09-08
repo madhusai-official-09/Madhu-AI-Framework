@@ -1,1 +1,63 @@
 @import "tailwindcss";
+
+/* MadhuAI scrollbar */
+.madhu-ai-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
+}
+
+.madhu-ai-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.madhu-ai-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.madhu-ai-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+}
+
+.madhu-ai-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.38);
+}
+
+/* Animated input border */
+.madhu-ai-input {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.madhu-ai-input::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  z-index: -2;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    transparent 280deg,
+    rgba(255, 255, 255, 0.05) 300deg,
+    rgba(255, 255, 255, 0.8) 330deg,
+    rgba(255, 255, 255, 0.05) 350deg,
+    transparent 360deg
+  );
+  animation: madhu-ai-border-spin 3s linear infinite;
+}
+
+.madhu-ai-input::after {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  z-index: -1;
+  border-radius: 0.75rem;
+  background: #000;
+}
+
+@keyframes madhu-ai-border-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

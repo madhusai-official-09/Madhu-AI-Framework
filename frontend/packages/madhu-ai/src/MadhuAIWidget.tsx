@@ -1,11 +1,82 @@
 import { useState } from "react";
-import { Bot, MessageCircle, Send, X } from "lucide-react";
+import { Bot, Send, X } from "lucide-react";
 import type { MadhuAIWidgetProps } from "./types";
 import Magnet from "./Magnet";
 
 interface Message {
   role: "user" | "assistant";
   content: string;
+}
+
+function renderInlineMarkdown(text: string) {
+  return text.split(/(\*\*[^*]+\*\*)/g).map((part, index) => {
+    if (part.startsWith("**") && part.endsWith("**")) {
+      return (
+        <strong key={index} className="font-semibold text-white">
+          {part.slice(2, -2)}
+        </strong>
+      );
+    }
+
+    return <span key={index}>{part}</span>;
+  });
+}
+
+function renderMessage(content: string) {
+  const blocks = content.split(/\n\s*\n/);
+
+  return (
+    <div className="space-y-3">
+      {blocks.map((block, blockIndex) => {
+        const lines = block
+          .split("\n")
+          .map((line) => line.trim())
+          .filter(Boolean);
+
+        const isBulletList =
+          lines.length > 0 && lines.every((line) => /^[-*]\s+/.test(line));
+
+        const isNumberedList =
+          lines.length > 0 && lines.every((line) => /^\d+\.\s+/.test(line));
+
+        if (isBulletList) {
+          return (
+            <ul
+              key={blockIndex}
+              className="list-disc space-y-1.5 pl-5 text-white/90"
+            >
+              {lines.map((line, index) => (
+                <li key={index}>
+                  {renderInlineMarkdown(line.replace(/^[-*]\s+/, ""))}
+                </li>
+              ))}
+            </ul>
+          );
+        }
+
+        if (isNumberedList) {
+          return (
+            <ol
+              key={blockIndex}
+              className="list-decimal space-y-1.5 pl-5 text-white/90"
+            >
+              {lines.map((line, index) => (
+                <li key={index}>
+                  {renderInlineMarkdown(line.replace(/^\d+\.\s+/, ""))}
+                </li>
+              ))}
+            </ol>
+          );
+        }
+
+        return (
+          <p key={blockIndex} className="leading-relaxed text-white/90">
+            {renderInlineMarkdown(lines.join(" "))}
+          </p>
+        );
+      })}
+    </div>
+  );
 }
 
 export default function MadhuAIWidget({
@@ -45,7 +116,7 @@ export default function MadhuAIWidget({
           </div>
 
           {/* Messages */}
-          <div className="flex-1 space-y-4 overflow-y-auto p-4">
+          <div className="madhu-ai-scrollbar flex-1 space-y-4 overflow-y-auto p-4">
             {messages.length === 0 ? (
               <div className="flex h-full items-center justify-center text-center text-xs text-white/40">
                 Ask me anything.
@@ -70,10 +141,12 @@ export default function MadhuAIWidget({
                     className={
                       item.role === "user"
                         ? "max-w-[85%] rounded-2xl border border-white/10 bg-white/10 px-3 py-2 text-sm text-white"
-                        : "max-w-[85%] rounded-2xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white/90"
+                        : "max-w-[85%] rounded-2xl border border-white/10 bg-white/5 px-3 py-2 text-sm"
                     }
                   >
-                    {item.content}
+                    {item.role === "assistant"
+                      ? renderMessage(item.content)
+                      : item.content}
                   </div>
                 </div>
               ))
@@ -136,7 +209,7 @@ export default function MadhuAIWidget({
               }
             }}
           >
-            <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-transparent px-3 py-2">
+            <div className="madhu-ai-input flex items-center gap-2 rounded-xl border border-white/10 bg-transparent px-3 py-2">
               <input
                 value={message}
                 onChange={(event) => setMessage(event.target.value)}
@@ -174,11 +247,7 @@ export default function MadhuAIWidget({
             className="!flex !size-14 !items-center !justify-center !rounded-full !bg-black !text-white shadow-2xl ring-1 ring-white/20"
             aria-label={open ? "Close MadhuAI" : "Open MadhuAI"}
           >
-            {open ? (
-              <X className="size-5" />
-            ) : (
-              <MessageCircle className="size-5" />
-            )}
+            {open ? <X className="size-5" /> : <Bot className="size-5" />}
           </button>
         </Magnet>
       </div>

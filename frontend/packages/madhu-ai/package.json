@@ -1,6 +1,6 @@
 {
   "name": "madhu-ai",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Embeddable MadhuAI chatbot widget for websites",
   "type": "module",
   "main": "./dist/madhu-ai.js",
