@@ -4,6 +4,11 @@ import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+
+  define: {
+    "process.env.NODE_ENV": JSON.stringify("production"),
+  },
+
   build: {
     outDir: "dist/widget",
     emptyOutDir: false,
