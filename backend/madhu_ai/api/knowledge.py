@@ -1,37 +1,38 @@
-from fastapi import APIRouter, Depends
-from pathlib import Path
+from fastapi import APIRouter, Depends, Query
 
 from .auth import get_current_user
+from ..memory.projects import ProjectStore
+from ..vectorstores.chroma_store import ChromaStore
+
 
 router = APIRouter(prefix="/knowledge", tags=["Knowledge"])
 
 
 @router.get("/")
-def list_files(current_user=Depends(get_current_user)):
-    folder = Path("knowledge")
+def list_files(
+    project_id: str = Query(...),
+    current_user=Depends(get_current_user),
+):
+    if not ProjectStore().belongs_to_user(project_id, current_user["uid"]):
+        return []
 
-    folder.mkdir(exist_ok=True)
-
-    return [
-        {
-            "name": f.name,
-            "size": f.stat().st_size,
-        }
-        for f in folder.iterdir()
-        if f.is_file()
-    ]
+    return ChromaStore.list_documents(project_id)
 
 
 @router.delete("/{filename}")
 def delete_file(
     filename: str,
+    project_id: str = Query(...),
     current_user=Depends(get_current_user),
 ):
-    path = Path("knowledge") / filename
+    if not ProjectStore().belongs_to_user(project_id, current_user["uid"]):
+        return {
+            "success": False,
+            "error": "Project not found.",
+        }
 
-    if path.exists():
-        path.unlink()
+    ChromaStore.delete_document(project_id, filename)
 
     return {
-        "success": True
+        "success": True,
     }

@@ -54,7 +54,7 @@ class ChromaStore:
         return cls._collections[project_id]
 
     @classmethod
-    def add(cls, text, embedding, project_id):
+    def add(cls, text, embedding, project_id, metadata=None):
         collection = cls._get_collection(project_id)
 
         if hasattr(embedding, "tolist"):
@@ -64,6 +64,7 @@ class ChromaStore:
             documents=[text],
             embeddings=[embedding],
             ids=[str(uuid.uuid4())],
+            metadatas=[metadata or {}],
         )
 
     @classmethod
@@ -79,3 +80,40 @@ class ChromaStore:
         )
 
         return results["documents"][0]
+    
+    @classmethod
+    def list_documents(cls, project_id):
+        collection = cls._get_collection(project_id)
+
+        data = collection.get(include=["metadatas"])
+
+        documents = {}
+
+        for metadata in data.get("metadatas", []):
+            metadata = metadata or {}
+            filename = metadata.get("filename")
+
+            if not filename:
+                continue
+
+            if filename not in documents:
+                documents[filename] = {
+                    "filename": filename,
+                    "size": metadata.get("size", 0),
+                    "status": metadata.get("status", "indexed"),
+                    "chunks": 0,
+                }
+
+            documents[filename]["chunks"] += 1
+
+        return list(documents.values())
+    
+    @classmethod
+    def delete_document(cls, project_id, filename):
+        collection = cls._get_collection(project_id)
+
+        collection.delete(
+            where={"filename": filename}
+        )
+
+        return True

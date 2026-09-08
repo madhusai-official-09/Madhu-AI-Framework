@@ -2,6 +2,7 @@
 import { sendChat, streamChat } from "../api/client";
 import { useChatStore, genId } from "../store/useChatStore";
 import { useSettingsStore } from "../store/useSettingsStore";
+import { useUIStore } from "../store/useUIStore";
 
 export function useChat() {
   const abortRef = useRef<AbortController | null>(null);
@@ -9,6 +10,7 @@ export function useChat() {
   const { addMessage, updateMessage, activeId, createConversation, getActive } =
     useChatStore();
   const streaming = useSettingsStore((s) => s.streaming);
+  const projectId = useUIStore((s) => s.activeProjectId);
 
   const stop = useCallback(() => {
     abortRef.current?.abort();
@@ -45,10 +47,20 @@ export function useChat() {
       abortRef.current = controller;
       setIsStreaming(true);
 
+      if (!projectId) {
+        updateMessage(convId, assistantId, {
+          streaming: false,
+          error: "No active project selected.",
+        });
+        setIsStreaming(false);
+        abortRef.current = null;
+        return;
+      }
+
       try {
         if (streaming) {
           let acc = "";
-          for await (const token of streamChat(trimmed, controller.signal)) {
+          for await (const token of streamChat(trimmed, projectId,controller.signal)) {
             acc += token;
             updateMessage(convId, assistantId, {
               content: acc,
@@ -60,7 +72,7 @@ export function useChat() {
             streaming: false,
           });
         } else {
-          const reply = await sendChat(trimmed, controller.signal);
+          const reply = await sendChat(trimmed, projectId,controller.signal);
           updateMessage(convId, assistantId, {
             content: reply,
             streaming: false,
@@ -87,6 +99,7 @@ export function useChat() {
       createConversation,
       isStreaming,
       streaming,
+      projectId,
     ],
   );
 
@@ -108,5 +121,3 @@ export function useChat() {
 
   return { send, stop, regenerate, isStreaming };
 }
-
-

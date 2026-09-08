@@ -194,7 +194,7 @@ class MadhuAI:
 
         return self._index_document(text)
 
-    def add_pdf(self, path: str, project_id: str,):
+    def add_pdf(self, path: str, project_id: str, metadata=None):
 
         if self.pdf_loader is None:
 
@@ -204,7 +204,7 @@ class MadhuAI:
 
         text = self.pdf_loader.load(path)
 
-        return self._index_document(text, project_id,)
+        return self._index_document(text, project_id, metadata)
 
     def add_website(self, url: str):
 
@@ -218,7 +218,7 @@ class MadhuAI:
 
         return self._index_document(text)
 
-    def _index_document(self, text: str, project_id:str,):
+    def _index_document(self, text: str, project_id:str, metadata=None):
         
         embedding_model = self.get_embedding_model()
         
@@ -239,6 +239,7 @@ class MadhuAI:
                 chunk,
                 embedding,
                 project_id,
+                metadata,
             )
 
         return len(chunks)

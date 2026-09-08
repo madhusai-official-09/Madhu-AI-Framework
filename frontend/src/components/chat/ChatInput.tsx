@@ -12,6 +12,7 @@ import {
 import { useAutoResize } from "../../hooks/useAutoResize";
 import { uploadFile } from "../../api/client";
 import { cn, formatBytes } from "../../utils/format";
+import { useUIStore } from "../../store/useUIStore";
 
 const UploadOverlay = lazy(() => import("./UploadOverlay"));
 
@@ -38,6 +39,7 @@ export default function ChatInput({ onSend, onStop, isStreaming }: Props) {
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const textareaRef = useAutoResize(text);
   const inputFileRef = useRef<HTMLInputElement>(null);
+  const projectId = useUIStore((s) => s.activeProjectId);
 
   const submit = () => {
     if (!text.trim() || isStreaming) return;
@@ -48,6 +50,11 @@ export default function ChatInput({ onSend, onStop, isStreaming }: Props) {
   };
 
   const handleFiles = async (files: FileList | File[]) => {
+    if (!projectId) {
+      console.error("No active project selected.");
+      return;
+    }
+
     const arr = Array.from(files);
 
     for (const file of arr) {
@@ -65,7 +72,7 @@ export default function ChatInput({ onSend, onStop, isStreaming }: Props) {
       setAttachments((prev) => [...prev, item]);
 
       try {
-        await uploadFile(file, (p) =>
+        await uploadFile(file, projectId, (p) =>
           setAttachments((prev) =>
             prev.map((a) => (a.id === id ? { ...a, progress: p } : a)),
           ),

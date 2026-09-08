@@ -19,6 +19,8 @@ import { auth } from "../../api/firebase";
 import { useState } from "react";
 import GlassSurface from "../ui/GlassSurface";
 import Magnet from "../ui/Magnet";
+import ProjectSelector from "./ProjectSelector";
+
 
 const GITHUB_URL =
   "https://github.com/madhusai-official-09/Madhu-AI-Framework.git";
@@ -105,6 +107,8 @@ export default function Navbar() {
 
         <div className="flex items-center gap-1.5 sm:gap-2">
           <ConnectionPill status={connection} />
+
+          <ProjectSelector/>
 
           <IconLink
             onClick={toggleKnowledge}

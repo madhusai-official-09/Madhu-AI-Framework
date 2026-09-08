@@ -30,7 +30,7 @@ async function safeJson(res: Response) {
 
 export async function ping(): Promise<boolean> {
   try {
-    const res = await fetch(url("/knowledge"), {
+    const res = await fetch(url("/projects"), {
       method: "GET",
       headers: await authHeaders(),
     });
@@ -43,6 +43,7 @@ export async function ping(): Promise<boolean> {
 
 export async function sendChat(
   message: string,
+  projectId: string,
   signal?: AbortSignal,
 ): Promise<string> {
   const res = await fetch(url("/chat"), {
@@ -50,7 +51,7 @@ export async function sendChat(
     headers: await authHeaders({
       "Content-Type": "application/json",
     }),
-    body: JSON.stringify({ message }),
+    body: JSON.stringify({ message, project_id: projectId,}),
     signal,
   });
 
@@ -73,9 +74,9 @@ export async function sendChat(
   return typeof data === "string" ? data : "";
 }
 
-
 export async function* streamChat(
   message: string,
+  projectId: string,
   signal?: AbortSignal,
 ): AsyncGenerator<string, void, void> {
   const res = await fetch(url("/chat/stream"), {
@@ -84,7 +85,7 @@ export async function* streamChat(
       "Content-Type": "application/json",
       Accept: "text/event-stream",
     }),
-    body: JSON.stringify({ message }),
+    body: JSON.stringify({ message, project_id: projectId,}),
     signal,
   });
 
@@ -171,14 +172,72 @@ export async function* streamChat(
   }
 }
 
+export interface Project {
+  id: string;
+  name: string;
+}
+
+export async function getProjects(): Promise<Project[]> {
+  const token = await getAuthToken();
+
+  const response = await fetch(url("/projects"), {
+    headers: token
+      ? {
+          Authorization: `Bearer ${token}`,
+        }
+      : {},
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      `Failed to load projects (${response.status})`,
+    );
+  }
+
+  return await response.json();
+}
+
+export async function createProject(
+  name: string,
+): Promise<Project> {
+  const token = await getAuthToken();
+
+  const response = await fetch(url("/projects"), {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      ...(token
+        ? {
+            Authorization: `Bearer ${token}`,
+          }
+        : {}),
+    },
+    body: JSON.stringify({
+      name,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(
+      `Failed to create project (${response.status})`,
+    );
+  }
+
+  return await response.json();
+}
+
 export async function uploadFile(
   file: File,
+  projectId: string,
   onProgress?: (p: number) => void,
 ): Promise<unknown> {
   return await new Promise(async (resolve, reject) => {
     const xhr = new XMLHttpRequest();
 
-    xhr.open("POST", url("/upload"));
+    const uploadUrl =
+      url("/upload") + `?project_id=${encodeURIComponent(projectId)}`;
+
+    xhr.open("POST", uploadUrl);
 
     const token = await getAuthToken();
 
@@ -200,9 +259,7 @@ export async function uploadFile(
           resolve(xhr.responseText);
         }
       } else {
-        reject(
-          new Error(xhr.responseText || `Upload failed (${xhr.status})`),
-        );
+        reject(new Error(xhr.responseText || `Upload failed (${xhr.status})`));
       }
     };
 
@@ -217,10 +274,15 @@ export async function uploadFile(
   });
 }
 
-export async function listKnowledge(): Promise<KnowledgeDoc[]> {
-  const res = await fetch(url("/knowledge"), {
-    headers: await authHeaders(),
-  });
+export async function listKnowledge(
+  projectId: string,
+): Promise<KnowledgeDoc[]> {
+  const res = await fetch(
+    url(`/knowledge?project_id=${encodeURIComponent(projectId)}`),
+    {
+      headers: await authHeaders(),
+    },
+  );
 
   if (!res.ok) {
     throw new Error(`Failed to load knowledge (${res.status})`);
@@ -251,9 +313,14 @@ export async function listKnowledge(): Promise<KnowledgeDoc[]> {
   return [];
 }
 
-export async function deleteKnowledge(filename: string): Promise<void> {
+export async function deleteKnowledge(
+  filename: string,
+  projectId: string,
+): Promise<void> {
   const res = await fetch(
-    url(`/knowledge/${encodeURIComponent(filename)}`),
+    url(
+      `/knowledge/${encodeURIComponent(filename)}?project_id=${encodeURIComponent(projectId)}`,
+    ),
     {
       method: "DELETE",
       headers: await authHeaders(),

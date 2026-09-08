@@ -17,34 +17,46 @@ import { cn, formatBytes } from "../../utils/format";
 
 export default function KnowledgePanel() {
   const setKnowledge = useUIStore((s) => s.setKnowledge);
+  const projectId = useUIStore((s) => s.activeProjectId);
   const [docs, setDocs] = useState<KnowledgeDoc[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const [uploads, setUploads] = useState<Record<string, number>>({});
   const inputRef = useRef<HTMLInputElement>(null);
 
   const load = useCallback(async () => {
+    if (!projectId) {
+      setDocs([]);
+      return;
+    }
+
     setLoading(true);
     setError(null);
+
     try {
-      const list = await listKnowledge();
+      const list = await listKnowledge(projectId);
       setDocs(list);
     } catch (e) {
       setError((e as Error).message);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [projectId]);
 
   useEffect(() => {
     load();
   }, [load]);
 
   const remove = async (filename: string) => {
+    if (!projectId) {
+      setError("No active project selected.");
+      return;
+    }
     if (!confirm(`Delete "${filename}" from the knowledge base?`)) return;
     try {
-      await deleteKnowledge(filename);
+      await deleteKnowledge(filename, projectId);
       setDocs((prev) => prev.filter((d) => d.filename !== filename));
     } catch (e) {
       setError((e as Error).message);
@@ -52,17 +64,27 @@ export default function KnowledgePanel() {
   };
 
   const handleFiles = async (files: FileList | File[]) => {
+    if (!projectId) {
+      setError("No active project selected.");
+      return;
+    }
+
+    setSuccess(null);
+
     for (const file of Array.from(files)) {
       const key = file.name + file.size;
       setUploads((p) => ({ ...p, [key]: 0 }));
       try {
-        await uploadFile(file, (p) => setUploads((u) => ({ ...u, [key]: p })));
+        await uploadFile(file, projectId, (p) =>
+          setUploads((u) => ({ ...u, [key]: p })),
+        );
         setUploads((p) => {
           const c = { ...p };
           delete c[key];
           return c;
         });
         await load();
+        setSuccess(`${file.name} uploaded and indexed successfully.`);
       } catch (e) {
         setError((e as Error).message);
         setUploads((p) => {
@@ -192,6 +214,11 @@ export default function KnowledgePanel() {
             <div className="mb-3 flex items-start gap-2 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-300">
               <AlertCircle className="size-3.5 mt-0.5" />
               <span className="min-w-0 flex-1">{error}</span>
+            </div>
+          )}
+          {success && (
+            <div className="mb-3 rounded-lg border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-xs text-emerald-300">
+              {success}
             </div>
           )}
 
