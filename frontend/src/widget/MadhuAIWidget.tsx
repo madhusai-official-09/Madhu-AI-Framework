@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { MessageCircle, Send, X } from "lucide-react";
+import { Bot, MessageCircle, Send, X } from "lucide-react";
 import type { MadhuAIWidgetProps } from "./types";
 import Magnet from "../components/ui/Magnet";
 
@@ -20,10 +20,18 @@ export default function MadhuAIWidget({
     <div className="fixed bottom-5 right-5 z-[9999]">
       {open && (
         <div className="mb-3 flex h-[520px] w-[360px] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-2xl border border-white/10 bg-black/90 shadow-2xl backdrop-blur-xl">
+          {/* Header */}
           <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
-            <div>
-              <div className="text-sm font-semibold text-white">MadhuAI</div>
-              <div className="text-[11px] text-white/50">AI Assistant</div>
+            <div className="flex items-center gap-2.5">
+              <div className="flex size-8 items-center justify-center rounded-xl border border-white/10 bg-white/[0.06] shadow-[0_4px_20px_rgba(255,255,255,0.04)]">
+                <Bot className="size-4 text-white/80" />
+              </div>
+
+              <div>
+                <div className="text-sm font-semibold text-white">MadhuAI</div>
+
+                <div className="text-[11px] text-white/50">AI Assistant</div>
+              </div>
             </div>
 
             <button
@@ -36,7 +44,8 @@ export default function MadhuAIWidget({
             </button>
           </div>
 
-          <div className="flex-1 space-y-3 overflow-y-auto p-4">
+          {/* Messages */}
+          <div className="flex-1 space-y-4 overflow-y-auto p-4">
             {messages.length === 0 ? (
               <div className="flex h-full items-center justify-center text-center text-xs text-white/40">
                 Ask me anything.
@@ -47,16 +56,31 @@ export default function MadhuAIWidget({
                   key={index}
                   className={
                     item.role === "user"
-                      ? "ml-auto max-w-[85%] rounded-2xl border border-white/10 bg-white/10 px-3 py-2 text-sm text-white"
-                      : "max-w-[85%] rounded-2xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white/90"
+                      ? "flex justify-end"
+                      : "flex items-start gap-2"
                   }
                 >
-                  {item.content}
+                  {item.role === "assistant" && (
+                    <div className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.06] shadow-[0_4px_20px_rgba(255,255,255,0.04)]">
+                      <Bot className="size-4 text-white/80" />
+                    </div>
+                  )}
+
+                  <div
+                    className={
+                      item.role === "user"
+                        ? "max-w-[85%] rounded-2xl border border-white/10 bg-white/10 px-3 py-2 text-sm text-white"
+                        : "max-w-[85%] rounded-2xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white/90"
+                    }
+                  >
+                    {item.content}
+                  </div>
                 </div>
               ))
             )}
           </div>
 
+          {/* Input */}
           <form
             className="border-t border-white/10 p-3"
             onSubmit={async (event) => {
@@ -68,7 +92,10 @@ export default function MadhuAIWidget({
 
               setMessages((prev) => [
                 ...prev,
-                { role: "user", content: trimmed },
+                {
+                  role: "user",
+                  content: trimmed,
+                },
               ]);
 
               setMessage("");
@@ -93,7 +120,10 @@ export default function MadhuAIWidget({
 
                 setMessages((prev) => [
                   ...prev,
-                  { role: "assistant", content: data.reply },
+                  {
+                    role: "assistant",
+                    content: data.reply,
+                  },
                 ]);
               } catch {
                 setMessages((prev) => [
@@ -124,11 +154,14 @@ export default function MadhuAIWidget({
             </div>
           </form>
 
+          {/* Footer */}
           <div className="px-4 pb-2 text-[9px] text-white/30">
             Powered by MadhuAI
           </div>
         </div>
       )}
+
+      {/* Launcher */}
       <div className="flex size-14 items-center justify-center">
         <Magnet padding={50} disabled={false}>
           <button
