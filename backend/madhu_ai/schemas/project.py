@@ -8,3 +8,4 @@ class ProjectCreate(BaseModel):
 class ProjectResponse(BaseModel):
     id: str
     name: str
+    widget_key: str

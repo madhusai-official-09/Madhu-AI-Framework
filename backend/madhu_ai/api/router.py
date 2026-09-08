@@ -1,6 +1,7 @@
 import json
 import shutil
 import tempfile
+import uuid
 
 from pathlib import Path
 from fastapi import APIRouter, Depends,File, HTTPException, UploadFile
@@ -51,16 +52,31 @@ def create_router(bot):
     @router.post("/public/chat", response_model=ChatResponse)
     def public_chat(request: PublicChatRequest):
         try:
+            project = ProjectStore().get_by_widget_key(request.project_id)
+
+            if not project:
+                raise HTTPException(
+                    status_code=404,
+                    detail="Invalid widget key.",
+                )
+
             reply = bot.chat(
                 request.message,
-                "public",
-                request.project_id,
+                f"public-{uuid.uuid4()}",
+                project["id"],
             )
+
             return ChatResponse(reply=reply)
+
+        except HTTPException:
+            raise
 
         except Exception as e:
             logger.exception(e)
-            raise HTTPException(status_code=500, detail="Chat failed")
+            raise HTTPException(
+                status_code=500,
+                detail="Chat failed",
+            )
 
     @router.post("/chat/stream")
     def chat_stream(request: ChatRequest,

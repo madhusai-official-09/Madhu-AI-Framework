@@ -40,3 +40,30 @@ export function mountMadhuAIWidget(
 
   return () => root.unmount();
 }
+
+const script = document.currentScript as HTMLScriptElement | null;
+
+if (script) {
+  const projectId = script.dataset.projectId;
+  const backendUrl = script.dataset.backendUrl;
+
+  if (projectId && backendUrl) {
+    const mount = () => {
+      const element = document.createElement("div");
+
+      element.id = "madhu-ai-widget-root";
+      document.body.appendChild(element);
+
+      mountMadhuAIWidget(element, {
+        projectId,
+        backendUrl,
+      });
+    };
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", mount, { once: true });
+    } else {
+      mount();
+    }
+  }
+}

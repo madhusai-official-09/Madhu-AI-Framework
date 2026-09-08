@@ -27,7 +27,19 @@ class ProjectStore:
                 "r",
                 encoding="utf-8",
             ) as file:
-                return json.load(file)
+                projects = json.load(file)
+
+            changed = False
+
+            for project in projects.values():
+                if "widget_key" not in project:
+                    project["widget_key"] = f"madhu_{uuid.uuid4().hex}"
+                    changed = True
+
+            if changed:
+                self._save(projects)
+
+            return projects
 
         except (json.JSONDecodeError, OSError):
             return {}
@@ -48,11 +60,13 @@ class ProjectStore:
         projects = self._load()
 
         project_id = str(uuid.uuid4())
+        widget_key = f"madhu_{uuid.uuid4().hex}"
 
         projects[project_id] = {
             "id": project_id,
             "user_id": user_id,
             "name": name,
+            "widget_key": widget_key,
         }
 
         self._save(projects)
@@ -62,6 +76,15 @@ class ProjectStore:
     def get(self, project_id):
         projects = self._load()
         return projects.get(project_id)
+    
+    def get_by_widget_key(self, widget_key):
+        projects = self._load()
+
+        for project in projects.values():
+            if project.get("widget_key") == widget_key:
+                return project
+
+        return None
     
     def belongs_to_user(self, project_id, user_id):
         project = self.get(project_id)

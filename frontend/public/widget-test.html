@@ -9,15 +9,10 @@
   <body>
     <h1>MadhuAI Widget Test</h1>
 
-    <div id="madhu-ai-widget"></div>
-
-    <script type="module">
-      import { mountMadhuAIWidget } from "/widget/madhu-ai-widget.js";
-
-      mountMadhuAIWidget(document.getElementById("madhu-ai-widget"), {
-        projectId: "25d848ad-81eb-4419-82d2-f277f23b5c62",
-        backendUrl: "https://madhu-ai-backend.onrender.com",
-      });
-    </script>
+    <script
+      src="/widget/madhu-ai-widget.umd.cjs"
+      data-project-id="25d848ad-81eb-4419-82d2-f277f23b5c62"
+      data-backend-url="https://madhu-ai-backend.onrender.com"
+    ></script>
   </body>
 </html>
