@@ -76,48 +76,60 @@ export default function ProjectSelector() {
   };
 
   return (
-    <div className="sticky top-0 z-50 flex items-center gap-2 rounded-xl border border-white/[0.10] bg-black/70 px-2 py-1.5 backdrop-blur-xl">
-      <select
-        value={activeProjectId ?? ""}
-        onChange={(e) => setActiveProjectId(e.target.value || null)}
-        disabled={loading || projects.length === 0}
-        className="max-w-48 rounded-lg border border-white/[0.10] bg-white/[0.05] px-3 py-1.5 text-xs text-foreground outline-none backdrop-blur-xl"
-        aria-label="Active project"
-      >
-        {projects.length === 0 ? (
-          <option value="">
-            {loading ? "Loading projects..." : "No projects"}
-          </option>
-        ) : (
-          projects.map((project) => (
-            <option key={project.id} value={project.id}>
-              {project.name}
-            </option>
-          ))
-        )}
-      </select>
+    <div className="sticky top-0 z-50 flex items-center gap-2 rounded-2xl border border-white/[0.10] bg-black/80 p-1.5 shadow-xl backdrop-blur-xl">
+      <div className="flex items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.04] px-2.5 py-1.5">
+        <span className="text-[10px] uppercase tracking-wider text-white/35">
+          Project
+        </span>
+
+        <select
+          value={activeProjectId ?? ""}
+          onChange={(e) => setActiveProjectId(e.target.value || null)}
+          disabled={loading || projects.length === 0}
+          className="max-w-40 bg-transparent text-xs font-medium text-white outline-none"
+          aria-label="Active project"
+        >
+          {projects.length === 0 ? (
+            <option value="">{loading ? "Loading..." : "No projects"}</option>
+          ) : (
+            projects.map((project) => (
+              <option
+                key={project.id}
+                value={project.id}
+                className="bg-black text-white"
+              >
+                {project.name}
+              </option>
+            ))
+          )}
+        </select>
+      </div>
 
       <button
         type="button"
         onClick={handleCreate}
         disabled={creating}
-        className="rounded-lg border border-white/[0.10] bg-white/[0.05] px-2.5 py-1.5 text-xs font-medium transition hover:bg-white/[0.10] disabled:opacity-50"
+        className="rounded-xl border border-white/[0.08] bg-white/[0.04] px-3 py-2 text-xs font-medium text-white/80 transition hover:bg-white/[0.09] disabled:opacity-50"
       >
         {creating ? "..." : "+ Project"}
       </button>
 
       {activeProject?.widget_key && (
-        <div className="hidden items-center gap-1.5 rounded-lg border border-white/[0.10] bg-white/[0.04] px-2 py-1.5 md:flex">
-          <span className="text-[10px] text-white/40">Widget</span>
+        <div className="hidden items-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.04] px-3 py-2 lg:flex">
+          <div className="flex flex-col leading-none">
+            <span className="text-[9px] uppercase tracking-wider text-white/30">
+              Widget Key
+            </span>
 
-          <code className="max-w-36 truncate text-[10px] text-white/70">
-            {activeProject.widget_key}
-          </code>
+            <code className="mt-1 max-w-48 truncate text-[10px] text-white/70">
+              {activeProject.widget_key}
+            </code>
+          </div>
 
           <button
             type="button"
             onClick={handleCopy}
-            className="rounded-md p-1 text-white/50 transition hover:bg-white/10 hover:text-white"
+            className="rounded-lg border border-white/[0.08] bg-white/[0.04] p-1.5 text-white/50 transition hover:bg-white/[0.10] hover:text-white"
             aria-label="Copy widget key"
           >
             {copied ? (
