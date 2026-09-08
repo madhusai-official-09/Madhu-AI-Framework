@@ -6,7 +6,7 @@
   "scripts": {
     "start": "vite --host 0.0.0.0 --port 3000",
     "dev": "vite --host 0.0.0.0 --port 3000",
-    "build": "npm run build:widget && tsc -b && vite build",
+    "build": "tsc -b && vite build && npm run build:widget",
     "build:widget": "vite build --config vite.widget.config.ts",
     "preview": "vite preview --host 0.0.0.0 --port 3000",
     "lint": "eslint ."
