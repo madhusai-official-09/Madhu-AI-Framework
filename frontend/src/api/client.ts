@@ -175,6 +175,7 @@ export async function* streamChat(
 export interface Project {
   id: string;
   name: string;
+  widget_key: string;
 }
 
 export async function getProjects(): Promise<Project[]> {
