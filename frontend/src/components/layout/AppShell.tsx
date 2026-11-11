@@ -10,7 +10,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
   const setSidebar = useUIStore((s) => s.setSidebar);
 
   return (
-    <div className="relative min-h-screen overflow-hidden">
+    <div className="relative min-h-dvh overflow-hidden">
       <AeroShards
         backgroundColor="#08070D"
         shardColor="#896ABD"
@@ -46,7 +46,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ type: "spring", damping: 26, stiffness: 220 }}
-              className="fixed inset-y-0 left-0 z-40 w-72 border-r border-border bg-sidebar/95 backdrop-blur-xl"
+              className="fixed inset-y-0 left-0 z-40 w-72 max-w-[85vw] border-r border-border bg-sidebar/95 backdrop-blur-xl"
               data-testid="sidebar"
             >
               <Sidebar />
@@ -76,7 +76,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
           }
         >
           <Navbar />
-          <main className="pt-14 min-h-screen">{children}</main>
+          <main className="min-h-dvh pt-14">{children}</main>
         </div>
       </div>
     </div>

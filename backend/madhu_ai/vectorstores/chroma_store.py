@@ -60,26 +60,32 @@ class ChromaStore:
         if hasattr(embedding, "tolist"):
             embedding = embedding.tolist()
 
-        collection.add(
-            documents=[text],
-            embeddings=[embedding],
-            ids=[str(uuid.uuid4())],
-            metadatas=[metadata or {}],
-        )
+        kwargs = {
+            "documents": [text],
+            "embeddings": [embedding],
+            "ids": [str(uuid.uuid4())],
+        }
+
+        if metadata:
+            kwargs["metadatas"] = [metadata]
+
+        collection.add(**kwargs)
 
     @classmethod
     def search(cls, embedding, project_id, top_k=3):
         collection = cls._get_collection(project_id)
 
-        print("CHROMA PROJECT:", project_id)
-        print("CHROMA COUNT:", collection.count())
-        
+        count = collection.count()
+
+        if count == 0:
+            return []
+
         if hasattr(embedding, "tolist"):
             embedding = embedding.tolist()
 
         results = collection.query(
             query_embeddings=[embedding],
-            n_results=top_k,
+            n_results=min(top_k, count),
         )
 
         return results["documents"][0]

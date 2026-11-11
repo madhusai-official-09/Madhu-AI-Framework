@@ -277,7 +277,7 @@ export default function ChatInput({ onSend, onStop, isStreaming }: Props) {
             }}
             rows={1}
             placeholder="Ask MadhuAI Anything"
-            className="flex-1 resize-none bg-transparent text-[15px] leading-6 outline-none placeholder:text-muted-foreground py-2 min-h-[36px]"
+            className="flex-1 resize-none bg-transparent text-base sm:text-[15px] leading-6 outline-none placeholder:text-muted-foreground py-2 min-h-[36px]"
             data-testid="chat-input-textarea"
           />
 

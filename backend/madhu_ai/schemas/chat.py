@@ -1,5 +1,7 @@
 from pydantic import BaseModel
 
+from .history import Message
+
 
 class ChatRequest(BaseModel):
     message: str
@@ -8,7 +10,9 @@ class ChatRequest(BaseModel):
 
 class ChatResponse(BaseModel):
     reply: str
-    
+
+
 class PublicChatRequest(BaseModel):
     message: str
     project_id: str
+    history: list[Message] = []

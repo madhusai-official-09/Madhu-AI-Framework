@@ -1,6 +1,6 @@
 from threading import Lock
 
-from openai import OpenAI  
+from openai import OpenAI
 
 from .base import BaseProvider
 
@@ -20,30 +20,27 @@ class GroqProvider(BaseProvider):
                         api_key=self.config.api_key,
                         base_url="https://api.groq.com/openai/v1",
                     )
-
         return GroqProvider._client
 
-    def chat(self, messages):
-        client = self._get_client()
-
-        response = client.chat.completions.create(
+    def _params(self, messages, stream=False):
+        return dict(
             model=self.config.model,
             messages=messages,
             temperature=self.config.temperature,
             max_tokens=self.config.max_tokens,
+            stream=stream,
+            extra_body={"reasoning_effort": "low"},
         )
 
-        return response.choices[0].message.content
+    def chat(self, messages):
+        response = self._get_client().chat.completions.create(
+            **self._params(messages)
+        )
+        return response.choices[0].message.content or ""
 
     def stream(self, messages):
-        client = self._get_client()
-
-        response = client.chat.completions.create(
-            model=self.config.model,
-            messages=messages,
-            temperature=self.config.temperature,
-            max_tokens=self.config.max_tokens,
-            stream=True,
+        response = self._get_client().chat.completions.create(
+            **self._params(messages, stream=True)
         )
 
         for chunk in response:

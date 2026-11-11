@@ -1,10 +1,10 @@
 import json
+import os
 import shutil
 import tempfile
-import uuid
 
 from pathlib import Path
-from fastapi import APIRouter, Depends,File, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from fastapi.responses import StreamingResponse
 from .auth import get_current_user
 from ..core.logger import logger
@@ -13,11 +13,13 @@ from ..schemas.history import Message
 from .knowledge import router as knowledge_router
 from ..memory.projects import ProjectStore
 from ..schemas.project import ProjectCreate, ProjectResponse
+from ..memory.conversation import ConversationMemory
 
 
 def create_router(bot):
     router = APIRouter()
     project_store = ProjectStore()
+
     @router.get("/health")
     def health():
         return {
@@ -28,73 +30,77 @@ def create_router(bot):
 
     @router.get("/history", response_model=list[Message])
     def history(current_user=Depends(get_current_user)):
-        user_id = current_user["uid"]
-        
-        bot.memory.load_user(user_id)
-        
-        return bot.memory.get_messages()
+        mem = ConversationMemory()
+        mem.load_user(current_user["uid"])
+        return list(mem.messages)
 
     @router.post("/chat", response_model=ChatResponse)
-    def chat(request: ChatRequest,
-             current_user=Depends(get_current_user),
-             ):
+    def chat(
+        request: ChatRequest,
+        current_user=Depends(get_current_user),
+    ):
+        user_id = current_user["uid"]
+        project_id = request.project_id
+
+        if not project_store.belongs_to_user(project_id, user_id):
+            raise HTTPException(status_code=403, detail="Access denied")
+
         try:
-            user_id = current_user["uid"]
-            project_id = request.project_id
-            
-            reply = bot.chat(request.message,user_id, project_id,)
+            reply = bot.chat(request.message, user_id, project_id)
             return ChatResponse(reply=reply)
 
         except Exception as e:
             logger.exception(e)
             raise HTTPException(status_code=500, detail="Chat failed")
-        
+
     @router.post("/public/chat", response_model=ChatResponse)
     def public_chat(request: PublicChatRequest):
+        project = project_store.get_by_widget_key(request.project_id)
+
+        if not project:
+            raise HTTPException(
+                status_code=404,
+                detail="Invalid widget key.",
+            )
+
         try:
-            project = ProjectStore().get_by_widget_key(request.project_id)
-
-            if not project:
-                raise HTTPException(
-                    status_code=404,
-                    detail="Invalid widget key.",
-                )
-
             reply = bot.chat(
                 request.message,
-                f"public-{uuid.uuid4()}",
+                "public",
                 project["id"],
+                history=[
+                    {"role": m.role, "content": m.content}
+                    for m in request.history[-4:]
+                ],
             )
 
             return ChatResponse(reply=reply)
 
-        except HTTPException:
-            raise
-
         except Exception as e:
             logger.exception(e)
-            raise HTTPException(
-                status_code=500,
-                detail="Chat failed",
-            )
+            raise HTTPException(status_code=500, detail="Chat failed")
 
     @router.post("/chat/stream")
-    def chat_stream(request: ChatRequest,
-                    current_user=Depends(get_current_user),):
+    def chat_stream(
+        request: ChatRequest,
+        current_user=Depends(get_current_user),
+    ):
+        user_id = current_user["uid"]
+        project_id = request.project_id
+
+        if not project_store.belongs_to_user(project_id, user_id):
+            raise HTTPException(status_code=403, detail="Access denied")
 
         def generate():
             try:
-                user_id = current_user["uid"]
-                project_id = request.project_id
-                
-                for token in bot.stream(request.message,user_id, project_id,):
+                for token in bot.stream(request.message, user_id, project_id):
                     yield f"data: {json.dumps({'token': token})}\n\n"
 
                 yield "data: [DONE]\n\n"
 
             except Exception as e:
                 logger.exception(e)
-                yield f"data: {json.dumps({'error':'Streaming failed'})}\n\n"
+                yield f"data: {json.dumps({'error': 'Streaming failed'})}\n\n"
 
         return StreamingResponse(
             generate(),
@@ -104,7 +110,7 @@ def create_router(bot):
                 "Connection": "keep-alive",
             },
         )
-        
+
     @router.post("/projects", response_model=ProjectResponse)
     def create_project(
         request: ProjectCreate,
@@ -115,7 +121,6 @@ def create_router(bot):
                 current_user["uid"],
                 request.name,
             )
-
             return ProjectResponse(**project)
 
         except Exception as e:
@@ -124,20 +129,12 @@ def create_router(bot):
                 status_code=500,
                 detail="Project creation failed",
             )
-            
-    @router.get("/projects", response_model=list[ProjectResponse])
-    def get_projects(
-        current_user=Depends(get_current_user),
-    ):
-        try:
-            projects = project_store.list_for_user(
-                current_user["uid"]
-            )
 
-            return [
-                ProjectResponse(**project)
-                for project in projects
-            ]
+    @router.get("/projects", response_model=list[ProjectResponse])
+    def get_projects(current_user=Depends(get_current_user)):
+        try:
+            projects = project_store.list_for_user(current_user["uid"])
+            return [ProjectResponse(**p) for p in projects]
 
         except Exception as e:
             logger.exception(e)
@@ -152,18 +149,17 @@ def create_router(bot):
         file: UploadFile = File(...),
         current_user=Depends(get_current_user),
     ):
+        user_id = current_user["uid"]
+
+        if not project_store.belongs_to_user(project_id, user_id):
+            raise HTTPException(
+                status_code=403,
+                detail="Project not found or access denied",
+            )
+
+        temp_path = None
+
         try:
-            user_id = current_user["uid"]
-
-            if not project_store.belongs_to_user(
-                project_id,
-                user_id,
-            ):
-                raise HTTPException(
-                    status_code=403,
-                    detail="Project not found or access denied",
-                )
-
             with tempfile.NamedTemporaryFile(
                 delete=False,
                 suffix=".pdf",
@@ -181,20 +177,15 @@ def create_router(bot):
                 },
             )
 
-            return {
-                "success": True,
-                "chunks": chunks,
-            }
-
-        except HTTPException:
-            raise
+            return {"success": True, "chunks": chunks}
 
         except Exception as e:
             logger.exception(e)
-            raise HTTPException(
-                status_code=500,
-                detail="Upload failed",
-            )
+            raise HTTPException(status_code=500, detail="Upload failed")
+
+        finally:
+            if temp_path and os.path.exists(temp_path):
+                os.remove(temp_path)
 
     router.include_router(knowledge_router)
 

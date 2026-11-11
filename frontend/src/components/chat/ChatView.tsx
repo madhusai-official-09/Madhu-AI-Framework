@@ -4,19 +4,21 @@ import MessageList from "./MessageList";
 import ChatInput from "./ChatInput";
 import ScrollToBottom from "./ScrollToBottom";
 import { useChatStore } from "../../store/useChatStore";
+import { useUIStore } from "../../store/useUIStore";
 import { useChat } from "../../hooks/useChat";
 
 export default function ChatView() {
   const active = useChatStore(
     (s) => s.conversations.find((c) => c.id === s.activeId) || null,
   );
+  const sidebarOpen = useUIStore((s) => s.sidebarOpen);
 
   const { send, stop, regenerate, isStreaming } = useChat();
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const [showScrollBtn, setShowScrollBtn] = useState(false);
   const [autoStick, setAutoStick] = useState(true);
-  const bottomRef = useRef<HTMLDivElement>(null)
+
   const messages = active?.messages ?? [];
   const isEmpty = messages.length === 0;
 
@@ -26,7 +28,6 @@ export default function ChatView() {
 
     const onScroll = () => {
       const distance = el.scrollHeight - el.scrollTop - el.clientHeight;
-
       setShowScrollBtn(distance > 240);
       setAutoStick(distance < 160);
     };
@@ -34,35 +35,25 @@ export default function ChatView() {
     el.addEventListener("scroll", onScroll, { passive: true });
     onScroll();
 
-    return () => {
-      el.removeEventListener("scroll", onScroll);
-    };
+    return () => el.removeEventListener("scroll", onScroll);
   }, [active?.id]);
 
   useEffect(() => {
     if (!autoStick) return;
-
     const el = scrollRef.current;
     if (!el) return;
-
     el.scrollTop = el.scrollHeight;
   }, [messages, autoStick, isStreaming]);
 
   const scrollToBottom = () => {
     const el = scrollRef.current;
     if (!el) return;
-
-    el.scrollTo({
-      top: el.scrollHeight,
-      behavior: "smooth",
-    });
-
+    el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
     setAutoStick(true);
   };
 
   return (
-    <div className="relative flex h-[calc(100vh-3.5rem)] min-h-0 flex-col overflow-hidden">
-      {/* Chat scroll area */}
+    <div className="relative flex h-[calc(100dvh-3.5rem)] min-h-0 flex-col overflow-hidden">
       <div
         ref={scrollRef}
         className="min-h-0 flex-1 overflow-y-auto overscroll-contain scroll-smooth pb-44"
@@ -70,7 +61,7 @@ export default function ChatView() {
       >
         <div className="mx-auto w-full max-w-4xl px-4 sm:px-6 lg:px-8">
           {isEmpty ? (
-            <div className="pt-12 sm:pt-20">
+            <div className="pt-6 sm:pt-16">
               <HeroWelcome onPick={send} />
             </div>
           ) : (
@@ -82,18 +73,19 @@ export default function ChatView() {
               />
             </div>
           )}
-          <div ref={bottomRef} className="h-px" />
         </div>
       </div>
 
-      {/* Scroll button */}
       <ScrollToBottom visible={showScrollBtn} onClick={scrollToBottom} />
 
-      {/* Floating input */}
-      <div className="pointer-events-none fixed inset-x-0 bottom-0 z-20">
+      <div
+        className={`pointer-events-none fixed bottom-0 left-0 right-0 z-20 transition-[left] duration-300 ${
+          sidebarOpen ? "md:left-72" : ""
+        }`}
+      >
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-background via-background/80 to-transparent" />
 
-        <div className="pointer-events-auto relative mx-auto w-full max-w-4xl px-4 pb-4 sm:px-6 sm:pb-6 lg:px-8">
+        <div className="pointer-events-auto relative mx-auto w-full max-w-4xl px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-6 sm:pb-6 lg:px-8">
           <ChatInput onSend={send} onStop={stop} isStreaming={isStreaming} />
         </div>
       </div>

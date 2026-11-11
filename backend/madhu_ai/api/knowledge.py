@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 
 from .auth import get_current_user
 from ..memory.projects import ProjectStore
@@ -8,14 +8,20 @@ from ..vectorstores.chroma_store import ChromaStore
 router = APIRouter(prefix="/knowledge", tags=["Knowledge"])
 
 
-@router.get("/")
+def _check_owner(project_id: str, user_id: str):
+    if not ProjectStore().belongs_to_user(project_id, user_id):
+        raise HTTPException(
+            status_code=403,
+            detail="Project not found or access denied",
+        )
+
+
+@router.get("")
 def list_files(
     project_id: str = Query(...),
     current_user=Depends(get_current_user),
 ):
-    if not ProjectStore().belongs_to_user(project_id, current_user["uid"]):
-        return []
-
+    _check_owner(project_id, current_user["uid"])
     return ChromaStore.list_documents(project_id)
 
 
@@ -25,14 +31,6 @@ def delete_file(
     project_id: str = Query(...),
     current_user=Depends(get_current_user),
 ):
-    if not ProjectStore().belongs_to_user(project_id, current_user["uid"]):
-        return {
-            "success": False,
-            "error": "Project not found.",
-        }
-
+    _check_owner(project_id, current_user["uid"])
     ChromaStore.delete_document(project_id, filename)
-
-    return {
-        "success": True,
-    }
+    return {"success": True}
