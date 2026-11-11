@@ -1,43 +1,23 @@
-import os
-
-import numpy as np
-from huggingface_hub import InferenceClient
+from fastembed import TextEmbedding
 
 
 class EmbeddingModel:
-    _client = None
+    _model = None
 
     @classmethod
-    def _get_client(cls):
-        if cls._client is None:
-            token = os.getenv("HF_TOKEN")
-
-            if not token:
-                raise RuntimeError("HF_TOKEN is not configured.")
-
-            cls._client = InferenceClient(
-                provider="hf-inference",
-                api_key=token,
+    def _get_model(cls):
+        if cls._model is None:
+            cls._model = TextEmbedding(
+                model_name="sentence-transformers/all-MiniLM-L6-v2"
             )
-
-        return cls._client
+        return cls._model
 
     @classmethod
     def embed(cls, text):
-        client = cls._get_client()
+        model = cls._get_model()
+        return next(iter(model.embed([text]))).tolist()
 
-        result = client.feature_extraction(
-            text,
-            model="sentence-transformers/all-MiniLM-L6-v2",
-        )
-
-        result = np.asarray(result)
-
-        # Hugging Face may return token-level embeddings:
-        # [tokens, dimensions]
-        # Convert them into one sentence embedding:
-        # [dimensions]
-        if result.ndim == 2:
-            result = result.mean(axis=0)
-
-        return result.tolist()
+    @classmethod
+    def embed_batch(cls, texts):
+        model = cls._get_model()
+        return [v.tolist() for v in model.embed(texts)]
