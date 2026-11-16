@@ -82,6 +82,7 @@ export const useUIStore = create<UIState>()(
       partialize: (s) => ({
         theme: s.theme,
         sidebarOpen: s.sidebarOpen,
+        activeProjectId: s.activeProjectId,
       }),
     },
   ),
